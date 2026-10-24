@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
 <meta name="theme-color" content="#15102b" />
 <meta name="mobile-web-app-capable" content="yes" />
-<title>Honmoon Adventures — Prototype 0.5</title>
+<title>Honmoon Adventures — Prototype 0.6</title>
 <style>
 :root{--bg:#15102b;--glass:rgba(20,12,44,.79);--line:rgba(255,255,255,.2);--text:#fff;--pink:#ff4ed7;--cyan:#65e9ff;--gold:#ffd76b;--violet:#9d5cff}
 *{box-sizing:border-box} html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;touch-action:none}#gameCanvas{width:100%;height:100%;display:block;outline:none}
@@ -26,6 +26,16 @@
 .parent-panel{text-align:left}.parent-panel h2{margin-top:0}.parent-panel button{margin-top:15px;padding:10px 18px;border-radius:12px;border:0}
 .guide-pill{position:absolute;left:50%;top:22%;transform:translateX(-50%);font-size:12px;background:rgba(22,13,51,.8);border:1px solid rgba(101,233,255,.35);border-radius:999px;padding:7px 12px;color:#b9f7ff}
 .combat-pill{position:absolute;right:19px;bottom:126px;font-size:10px;background:rgba(14,9,35,.82);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:7px 9px;text-align:center;min-width:86px}.combat-pill b{display:block;font-size:11px;margin-bottom:2px}
+
+/* v0.6 visual polish */
+.party-card{overflow:hidden}.party-card::after{content:"";position:absolute;inset:auto 8px 3px 8px;height:2px;border-radius:4px;background:rgba(255,255,255,.16)}
+.party-card.active::after{background:rgba(255,255,255,.72)}
+.portrait{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.28);box-shadow:inset 0 -8px 14px rgba(0,0,0,.18)}
+.portrait::before{content:"";position:absolute;width:22px;height:13px;border-radius:50% 50% 38% 38%;top:2px;left:6px;background:rgba(20,10,35,.48);transform:rotate(-6deg)}
+.party-card[data-char="rumi"] .portrait::before{background:#8a59cf}.party-card[data-char="mira"] .portrait::before{background:#e96772}.party-card[data-char="zoey"] .portrait::before{background:#17152d}
+.objective{border-color:rgba(255,215,107,.27)}
+.message{box-shadow:0 0 24px rgba(113,74,255,.16)}
+
 @media(max-width:900px){.party-card{padding:5px 6px}.party-card .char-meta{display:none}.portrait{width:34px;height:34px}.objective{max-width:38vw;font-size:11px}.joystick{width:112px;height:112px}.stick{width:52px;height:52px;left:28px;top:28px}.actions{transform:scale(.9);transform-origin:bottom right}.enemy-hud{top:64px}.combat-pill{right:12px;bottom:118px;font-size:9px}}
 </style>
 </head>
@@ -54,7 +64,7 @@
   </div>
   <button id="sealBtn" class="hidden">✨ SCELLER</button>
   <div id="sealPanel" class="overlay hidden"><div class="panel"><div class="seal-title">SCEAU DE L’HONMOON</div><div class="seal-subtitle">Complète le sceau</div><div id="question" class="question">8 + 7 = ?</div><div id="answers" class="answers"></div><div id="sealHint" class="seal-hint"></div></div></div>
-  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Prototype v0.5 — styles de combat distincts, combos de Rumi, brise-bouclier de Mira et tirs améliorés de Zoey.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
+  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Prototype v0.6 — silhouettes HUNTR/X améliorées, démon plus expressif, effets Honmoon et rue de Séoul enrichie.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
 </div>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script>
@@ -93,17 +103,68 @@ function createStreet(){
  }
  for(let z=-22;z<22;z+=7){[-1,1].forEach((side,j)=>{box('pole'+z+j,.08,2.6,.08,side*4.65,1.3,z,new BABYLON.Color3(.2,.22,.3));const lamp=BABYLON.MeshBuilder.CreateSphere('lamp'+z+j,{diameter:.32,segments:8},scene);lamp.position.set(side*4.65,2.7,z);lamp.material=neon('lampMat'+z+j,j?new BABYLON.Color3(.2,.85,1):new BABYLON.Color3(1,.25,.75));});}
  for(let i=0;i<8;i++){const side=i%2?-1:1;const z=-18+i*5.8;box('treeT'+i,.18,1.5,.18,side*5.3,.75,z,new BABYLON.Color3(.18,.09,.07));const crown=BABYLON.MeshBuilder.CreateSphere('treeC'+i,{diameter:1.45,segments:8},scene);crown.position.set(side*5.3,1.8,z);crown.material=mat('treeCM'+i,new BABYLON.Color3(.35,.14,.28),.2);}
+ // Extra street detail: sidewalks, crosswalk, shop windows and overhead lanterns.
+ box('sidewalkL',2.35,.10,61,-5.75,.05,0,new BABYLON.Color3(.16,.16,.20));box('sidewalkR',2.35,.10,61,5.75,.05,0,new BABYLON.Color3(.16,.16,.20));
+ for(let x=-3.7;x<=3.7;x+=1.05)box('cross'+x,.62,.025,2.2,x,.04,10.2,new BABYLON.Color3(.72,.72,.66));
+ for(let i=0;i<12;i++){const side=i%2?-1:1,z=-24+i*4.5;const win=BABYLON.MeshBuilder.CreatePlane('window'+i,{width:1.15,height:1.15},scene);win.position.set(side*6.81,1.95,z-.45);win.rotation.y=side<0?Math.PI/2:-Math.PI/2;win.material=neon('windowM'+i,i%2?new BABYLON.Color3(.15,.52,.78):new BABYLON.Color3(.88,.22,.55));win.visibility=.55;}
+ for(let z=-14;z<17;z+=7){const cord=box('cord'+z,9.2,.025,.025,0,3.35,z,new BABYLON.Color3(.16,.14,.22));for(let x=-3.6;x<=3.6;x+=1.8){const bulb=BABYLON.MeshBuilder.CreateSphere('bulb'+z+x,{diameter:.16,segments:6},scene);bulb.position.set(x,3.27,z);bulb.material=neon('bulbM'+z+x,((x+z)%2)?new BABYLON.Color3(1,.38,.65):new BABYLON.Color3(.25,.72,1));}}
+
  const torus=BABYLON.MeshBuilder.CreateTorus('portal',{diameter:3.4,thickness:.18,tessellation:32},scene);torus.position.set(0,1.8,20);torus.rotation.x=Math.PI/2;torus.material=neon('portalMat',new BABYLON.Color3(.45,.25,1));torus.setEnabled(false);
 }
 function createHunter(key,color,pos){
- const root=BABYLON.MeshBuilder.CreateCapsule(key,{height:2.1,radius:.43},scene);root.position.copyFrom(pos);root.material=neon(key+'Mat',color);root.metadata={key};
+ const root=BABYLON.MeshBuilder.CreateCapsule(key,{height:2.1,radius:.38},scene);root.position.copyFrom(pos);root.material=mat(key+'RootMat',color,.1);root.material.alpha=0;root.isPickable=false;root.metadata={key};
+ const skin=mat(key+'Skin',new BABYLON.Color3(.92,.68,.58),.04);
+ const dark=mat(key+'Dark',new BABYLON.Color3(.045,.04,.075),.05);
+ const yellow=mat(key+'Yellow',new BABYLON.Color3(.94,.57,.08),.16);
+ const pink=mat(key+'Pink',new BABYLON.Color3(.92,.18,.42),.18);
+ const teal=mat(key+'Teal',new BABYLON.Color3(.04,.48,.52),.18);
+ const white=mat(key+'White',new BABYLON.Color3(.84,.84,.9),.07);
+ function childBox(n,w,h,d,x,y,z,m){const q=BABYLON.MeshBuilder.CreateBox(n,{width:w,height:h,depth:d},scene);q.parent=root;q.position.set(x,y,z);q.material=m;return q}
+ function childSphere(n,d,x,y,z,m,sy=1){const q=BABYLON.MeshBuilder.CreateSphere(n,{diameter:d,segments:8},scene);q.parent=root;q.position.set(x,y,z);q.scaling.y=sy;q.material=m;return q}
+ function limb(n,x,y,z,h,m,rz=0){const q=BABYLON.MeshBuilder.CreateCapsule(n,{height:h,radius:.105,tessellation:6},scene);q.parent=root;q.position.set(x,y,z);q.rotation.z=rz;q.material=m;return q}
+ // shared body proportions
+ childSphere(key+'Head',.62,0,.70,0,skin,1.08);
+ limb(key+'LegL',-.18,-.53,0,.83,skin,.02);limb(key+'LegR',.18,-.53,0,.83,skin,-.02);
+ limb(key+'ArmL',-.43,.16,0,.72,skin,-.18);limb(key+'ArmR',.43,.16,0,.72,skin,.18);
  const weaponMat=neon(key+'WeaponMat',hunterInfo[key].attackColor);
  if(key==='rumi'){
-   const w=BABYLON.MeshBuilder.CreateBox('rumiSword',{width:.12,height:1.35,depth:.08},scene);w.parent=root;w.position.set(.55,.15,.05);w.rotation.z=-.5;w.material=weaponMat;root.metadata.weapon=w;
+   // Iconic purple braided hair + yellow jacket / black shorts.
+   const hair=mat('rumiHair',new BABYLON.Color3(.43,.20,.67),.14);
+   childSphere('rumiHairCap',.68,0,.79,.05,hair,1.06);
+   const bun=childSphere('rumiBun',.32,0,1.08,.05,hair);bun.scaling.x=.9;
+   for(let i=0;i<5;i++){const b=childSphere('rumiBraid'+i,.25,.23+i*.035,.50-i*.23,.20,hair,1.15);b.rotation.z=.1+i*.05}
+   childBox('rumiTop',.58,.36,.34,0,.22,0,white);
+   childBox('rumiShorts',.64,.31,.38,0,-.11,0,dark);
+   childBox('rumiJacketL',.18,.58,.38,-.36,.25,.01,yellow);childBox('rumiJacketR',.18,.58,.38,.36,.25,.01,yellow);
+   childBox('rumiBootL',.23,.43,.29,-.18,-.81,.02,dark);childBox('rumiBootR',.23,.43,.29,.18,-.81,.02,dark);
+   const w=BABYLON.MeshBuilder.CreateBox('rumiSword',{width:.11,height:1.42,depth:.07},scene);w.parent=root;w.position.set(.57,.13,.06);w.rotation.z=-.5;w.material=weaponMat;root.metadata.weapon=w;
+   const guard=BABYLON.MeshBuilder.CreateBox('rumiGuard',{width:.34,height:.07,depth:.09},scene);guard.parent=w;guard.position.y=-.55;guard.material=neon('rumiGuardM',new BABYLON.Color3(1,.72,.25));
  }else if(key==='mira'){
-   const w=BABYLON.MeshBuilder.CreateBox('miraBlade',{width:.16,height:1.55,depth:.11},scene);w.parent=root;w.position.set(.58,.1,.03);w.rotation.z=-.35;w.material=weaponMat;root.metadata.weapon=w;
+   // Long salmon-pink hair, dark cropped tee, yellow skirt and tall boots.
+   const hair=mat('miraHair',new BABYLON.Color3(.78,.28,.34),.14);
+   childSphere('miraHairCap',.69,0,.79,.04,hair,1.04);
+   const pony=childBox('miraPony',.28,1.18,.24,.24,.33,.17,hair);pony.rotation.z=-.08;
+   childBox('miraTop',.62,.38,.35,0,.22,0,dark);
+   const skirt=BABYLON.MeshBuilder.CreateCylinder('miraSkirt',{height:.36,diameterTop:.59,diameterBottom:.78,tessellation:10},scene);skirt.parent=root;skirt.position.set(0,-.12,0);skirt.material=yellow;
+   childBox('miraBootL',.24,.68,.30,-.18,-.69,.02,dark);childBox('miraBootR',.24,.68,.30,.18,-.69,.02,dark);
+   childBox('miraBootAccentL',.25,.13,.31,-.18,-.55,-.01,pink);childBox('miraBootAccentR',.25,.13,.31,.18,-.55,-.01,pink);
+   const grip=new BABYLON.TransformNode('miraWeaponGrip',scene);grip.parent=root;grip.position.set(.58,.10,.03);grip.rotation.z=-.35;
+   const w=BABYLON.MeshBuilder.CreateBox('miraBlade',{width:.15,height:1.18,depth:.09},scene);w.parent=grip;w.position.set(0,.10,0);w.material=weaponMat;
+   const tip=BABYLON.MeshBuilder.CreateBox('miraBladeTip',{width:.15,height:.58,depth:.09},scene);tip.parent=grip;tip.position.set(.16,.77,0);tip.rotation.z=-.28;tip.material=weaponMat;
+   root.metadata.weapon=grip;
  }else{
-   const w1=BABYLON.MeshBuilder.CreateBox('zoeyBlade1',{width:.1,height:.72,depth:.08},scene);const w2=w1.clone('zoeyBlade2');w1.parent=root;w2.parent=root;w1.position.set(.48,.12,.03);w2.position.set(-.48,.12,.03);w1.rotation.z=-.45;w2.rotation.z=.45;w1.material=weaponMat;w2.material=weaponMat;root.metadata.weapon=w1;root.metadata.weapon2=w2;
+   // Zoey's dark bob, teal asymmetric top and loose performance trousers.
+   const hair=mat('zoeyHair',new BABYLON.Color3(.055,.045,.095),.08);
+   childSphere('zoeyHairCap',.69,0,.79,.02,hair,1.03);
+   childBox('zoeyBang',.52,.15,.12,0,.83,-.28,hair);
+   childSphere('zoeyBunL',.24,-.29,.76,.10,hair);childSphere('zoeyBunR',.24,.29,.76,.10,hair);
+   childBox('zoeyTop',.58,.40,.34,0,.20,0,teal);
+   childBox('zoeyWaist',.59,.16,.35,0,-.07,0,yellow);
+   childBox('zoeyPantsL',.30,.72,.37,-.18,-.48,0,dark);childBox('zoeyPantsR',.30,.72,.37,.18,-.48,0,dark);
+   childBox('zoeyStripeL',.06,.58,.385,-.28,-.45,-.01,yellow);childBox('zoeyStripeR',.06,.58,.385,.28,-.45,-.01,teal);
+   const w1=BABYLON.MeshBuilder.CreateBox('zoeyBlade1',{width:.1,height:.72,depth:.07},scene);const w2=w1.clone('zoeyBlade2');w1.parent=root;w2.parent=root;w1.position.set(.49,.10,.03);w2.position.set(-.49,.10,.03);w1.rotation.z=-.45;w2.rotation.z=.45;w1.material=weaponMat;w2.material=weaponMat;
+   [w1,w2].forEach((w,i)=>{const fin=BABYLON.MeshBuilder.CreateCylinder('zoeyFin'+i,{height:.30,diameterTop:0,diameterBottom:.18,tessellation:5},scene);fin.parent=w;fin.position.y=.40;fin.material=weaponMat;});
+   root.metadata.weapon=w1;root.metadata.weapon2=w2;
  }
  return root;
 }
@@ -115,9 +176,16 @@ function createDerpy(){
  const tail=BABYLON.MeshBuilder.CreateTorus('tail',{diameter:.6,thickness:.1,tessellation:14,arc:.65},scene);tail.parent=derpy;tail.position.set(.44,.05,.25);tail.rotation.y=Math.PI/2;tail.material=derpy.material;
 }
 function createDemon(){
- demon=BABYLON.MeshBuilder.CreateSphere('demon',{diameter:1.55,segments:12},scene);demon.position.set(0,.78,16);demon.material=neon('demonMat',new BABYLON.Color3(.88,.04,.28));demon.setEnabled(false);
- const h1=BABYLON.MeshBuilder.CreateCylinder('h1',{height:.7,diameterTop:0,diameterBottom:.28,tessellation:8},scene),h2=h1.clone('h2');h1.parent=demon;h2.parent=demon;h1.position.set(-.38,.72,0);h2.position.set(.38,.72,0);h1.rotation.z=-.32;h2.rotation.z=.32;h1.material=demon.material;h2.material=demon.material;
- const eyeM=neon('eyeMat',new BABYLON.Color3(1,.82,.12));[-.23,.23].forEach((x,i)=>{const e=BABYLON.MeshBuilder.CreateSphere('eye'+i,{diameter:.15,segments:8},scene);e.parent=demon;e.position.set(x,.1,-.71);e.material=eyeM;});
+ demon=BABYLON.MeshBuilder.CreateSphere('demon',{diameter:1.62,segments:12},scene);demon.position.set(0,.78,16);demon.scaling.copyFromFloats(.92,1.14,.92);demon.material=neon('demonMat',new BABYLON.Color3(.72,.025,.19));demon.setEnabled(false);
+ const bodyM=demon.material, darkM=mat('demonDark',new BABYLON.Color3(.08,.015,.15),.18), markM=neon('demonMarks',new BABYLON.Color3(.72,.16,1));
+ const head=BABYLON.MeshBuilder.CreateSphere('demonHead',{diameter:.82,segments:10},scene);head.parent=demon;head.position.set(0,.66,-.05);head.material=bodyM;
+ const jaw=BABYLON.MeshBuilder.CreateBox('demonJaw',{width:.55,height:.20,depth:.37},scene);jaw.parent=demon;jaw.position.set(0,.40,-.29);jaw.material=darkM;
+ [-.39,.39].forEach((x,i)=>{const h=BABYLON.MeshBuilder.CreateCylinder('horn'+i,{height:.82,diameterTop:0,diameterBottom:.25,tessellation:7},scene);h.parent=demon;h.position.set(x,.98,.02);h.rotation.z=i?-.40:.40;h.material=darkM;});
+ [-.23,.23].forEach((x,i)=>{const e=BABYLON.MeshBuilder.CreateSphere('eye'+i,{diameter:.16,segments:7},scene);e.parent=demon;e.position.set(x,.72,-.41);e.material=neon('eyeMat'+i,new BABYLON.Color3(1,.76,.1));});
+ const chest=BABYLON.MeshBuilder.CreateTorus('demonChestMark',{diameter:.82,thickness:.055,tessellation:18,arc:.63},scene);chest.parent=demon;chest.position.set(0,.02,-.78);chest.rotation.x=Math.PI/2;chest.rotation.z=.30;chest.material=markM;
+ [-.66,.66].forEach((x,i)=>{const arm=BABYLON.MeshBuilder.CreateCapsule('demonArm'+i,{height:1.25,radius:.17,tessellation:7},scene);arm.parent=demon;arm.position.set(x,.00,0);arm.rotation.z=i?-.28:.28;arm.material=bodyM;const claw=BABYLON.MeshBuilder.CreateCylinder('claw'+i,{height:.45,diameterTop:0,diameterBottom:.18,tessellation:5},scene);claw.parent=demon;claw.position.set(x+(i?.12:-.12),-.62,-.06);claw.rotation.z=i?-.25:.25;claw.material=darkM;});
+ const aura=BABYLON.MeshBuilder.CreateTorus('demonAura',{diameter:2.05,thickness:.045,tessellation:24},scene);aura.parent=demon;aura.position.set(0,-.68,0);aura.rotation.x=Math.PI/2;aura.material=markM;aura.visibility=.7;
+ demon.metadata={aura};
 }
 function createScene(){
  scene=new BABYLON.Scene(engine);scene.clearColor=new BABYLON.Color4(.035,.025,.085,1);scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogDensity=.0105;scene.fogColor=new BABYLON.Color3(.07,.05,.16);
@@ -129,7 +197,7 @@ function createScene(){
  zoey=createHunter('zoey',hunterInfo.zoey.color,new BABYLON.Vector3(1.1,BASE_Y,-20.3));
  hunters.rumi=rumi;hunters.mira=mira;hunters.zoey=zoey;player=rumi;
  createDerpy();createDemon();
- slashFx=BABYLON.MeshBuilder.CreateTorus('slashFx',{diameter:2.35,thickness:.06,tessellation:24,arc:.56},scene);slashFx.parent=player;slashFx.position.set(0,.25,-.65);slashFx.rotation.x=Math.PI/2;slashFx.material=neon('slashMat',hunterInfo.rumi.attackColor);slashFx.setEnabled(false);
+ slashFx=BABYLON.MeshBuilder.CreateTorus('slashFx',{diameter:2.35,thickness:.06,tessellation:24,arc:.56},scene);slashFx.parent=player;slashFx.position.set(0,.25,-.65);slashFx.rotation.x=Math.PI/2;slashFx.material=neon('slashMat',hunterInfo.rumi.attackColor);slashFx.visibility=.88;slashFx.setEnabled(false);
  activeRing=BABYLON.MeshBuilder.CreateTorus('activeRing',{diameter:1.45,thickness:.045,tessellation:24},scene);activeRing.parent=player;activeRing.position.set(0,-1.01,0);activeRing.rotation.x=Math.PI/2;activeRing.material=neon('activeRingMat',hunterInfo.rumi.attackColor);
  impactRing=BABYLON.MeshBuilder.CreateTorus('impactRing',{diameter:1.2,thickness:.07,tessellation:20},scene);impactRing.rotation.x=Math.PI/2;impactRing.material=neon('impactRingMat',hunterInfo.mira.attackColor);impactRing.setEnabled(false);
  camera=new BABYLON.ArcRotateCamera('camera',-Math.PI/2,1.08,7.8,player.position.add(new BABYLON.Vector3(0,1,0)),scene);camera.lowerRadiusLimit=5.5;camera.upperRadiusLimit=10;camera.lowerBetaLimit=.72;camera.upperBetaLimit=1.35;camera.attachControl(canvas,true);camera.inputs.attached.pointers.buttons=[0];camera.panningSensibility=0;camera.wheelPrecision=80;
@@ -251,7 +319,7 @@ function update(){
  try{
   const dt=Math.min(engine.getDeltaTime()/1000,.033);
   if(rumiComboTimer>0){rumiComboTimer=Math.max(0,rumiComboTimer-dt);if(rumiComboTimer===0)rumiCombo=0}
-  if(activeRing)activeRing.rotation.z+=dt*.8;
+  if(activeRing)activeRing.rotation.z+=dt*.8;if(demon&&demon.metadata&&demon.metadata.aura&&demon.isEnabled())demon.metadata.aura.rotation.z-=dt*1.25;
   if(!lastGoodPlayerPos)lastGoodPlayerPos=player.position.clone();
   const axes=getMoveAxes();
   const ix=Number.isFinite(input.x)?input.x:0, iy=Number.isFinite(input.y)?input.y:0;
