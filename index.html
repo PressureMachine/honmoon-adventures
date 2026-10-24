@@ -51,7 +51,7 @@
   </div>
   <button id="sealBtn" class="hidden">✨ SCELLER</button>
   <div id="sealPanel" class="overlay hidden"><div class="panel"><div class="seal-title">SCEAU DE L’HONMOON</div><div class="seal-subtitle">Complète le sceau</div><div id="question" class="question">8 + 7 = ?</div><div id="answers" class="answers"></div><div id="sealHint" class="seal-hint"></div></div></div>
-  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Prototype v0.3 — les réglages détaillés viendront après validation du gameplay.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
+  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Prototype v0.3.1 — les réglages détaillés viendront après validation du gameplay.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
 </div>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script>
@@ -64,7 +64,7 @@ const input={x:0,y:0};
 const BASE_Y=1.05, DEMON_MAX_HP=7;
 let demonHP=DEMON_MAX_HP,playerHP=3,playerInvulnerable=0,demonAttackCooldown=1.2,demonStunned=false;
 let verticalVelocity=0,onGround=true,dodgeTime=0,dodgeDir=new BABYLON.Vector3(),attackTime=0,encounterStarted=false,sealOpened=false;
-let derpyPhase=0,derpyWait=0,derpyComplete=false;
+let derpyPhase=1,derpyWait=0,derpyComplete=false,derpyStarted=false,derpyPaused=false;
 const derpyPoints=[new BABYLON.Vector3(-1,.58,-12),new BABYLON.Vector3(2.8,.58,-5),new BABYLON.Vector3(-2.4,.58,4),new BABYLON.Vector3(0,.58,11.5)];
 function mat(name,color,em=.25){const m=new BABYLON.StandardMaterial(name,scene);m.diffuseColor=color.scale(.55);m.emissiveColor=color.scale(em);m.specularColor=BABYLON.Color3.Black();return m}
 function neon(name,color){return mat(name,color,.85)}
@@ -122,9 +122,37 @@ function attack(){if(attackTime>0||sealOpened)return;attackTime=.32;slashFx.setE
 function jump(){if(!onGround)return;verticalVelocity=7.2;onGround=false}
 function dodge(){if(dodgeTime>0)return;const f=camera.getForwardRay().direction;f.y=0;f.normalize();const r=BABYLON.Vector3.Cross(BABYLON.Axis.Y,f).normalize();let d=f.scale(input.y).add(r.scale(input.x));if(d.lengthSquared()<.05)d=f.scale(-1);d.normalize();dodgeDir.copyFrom(d);dodgeTime=.22;flash('ESQUIVE !',320)}
 function companionFollow(mesh,offset,dt){const target=player.position.add(offset);target.y=BASE_Y;const to=target.subtract(mesh.position);if(to.length()>4.2)mesh.position=BABYLON.Vector3.Lerp(mesh.position,target,.13);else mesh.position.addInPlace(to.scale(Math.min(1,4*dt)));if(to.lengthSquared()>.03)mesh.rotation.y=Math.atan2(to.x,to.z)}
-function updateDerpy(dt){if(derpyComplete||!document.getElementById('derpyToggle').checked)return;const p=derpyPoints[Math.min(derpyPhase,derpyPoints.length-1)];const d=BABYLON.Vector3.Distance(player.position,derpy.position);if(d<3.7&&derpyPhase<derpyPoints.length-1){if(derpyWait<=0){derpyWait=.45;flash(derpyPhase===0?'Zoey : « Derpy ? Où est-ce que tu vas ? »':'Derpy repart en courant !',950)}else{derpyWait-=dt;if(derpyWait<=0)derpyPhase++}}
- const target=derpyPoints[derpyPhase];const to=target.subtract(derpy.position);to.y=0;if(to.length()>.25){to.normalize();derpy.position.addInPlace(to.scale(3.1*dt));derpy.rotation.y=Math.atan2(to.x,to.z)}else derpy.rotation.y+=.012;
- if(derpyPhase===derpyPoints.length-1&&BABYLON.Vector3.Distance(player.position,derpy.position)<4&&!derpyComplete){derpyComplete=true;document.getElementById('guidePill').classList.add('hidden');startEncounter()}}
+function updateDerpy(dt){
+ if(derpyComplete||!document.getElementById('derpyToggle').checked)return;
+ const playerDist=BABYLON.Vector3.Distance(player.position,derpy.position);
+ // Derpy waits for Juliet to approach, then visibly runs ahead instead of acting like a static trigger.
+ if(!derpyStarted){
+  if(playerDist>5.2){derpy.rotation.y+=.012;return}
+  derpyStarted=true;derpyPaused=false;flash('Zoey : « Derpy ? Où est-ce que tu vas ? »',1100);
+  document.getElementById('guidePill').textContent='🐯 Suis Derpy — il a repéré quelque chose !';
+ }
+ // If the player falls well behind, Derpy stops and waits rather than disappearing down the street.
+ if(playerDist>8.0){
+  if(!derpyPaused){derpyPaused=true;document.getElementById('guidePill').textContent='🐯 Derpy t’attend… rejoins-le !'}
+  derpy.rotation.y+=.01;return;
+ }
+ if(derpyPaused&&playerDist<5.8){derpyPaused=false;flash('Derpy repart en courant !',850);document.getElementById('guidePill').textContent='🐯 Suis Derpy !'}
+ if(derpyPaused)return;
+ const target=derpyPoints[derpyPhase];const to=target.subtract(derpy.position);to.y=0;const remaining=to.length();
+ if(remaining>.28){
+  to.normalize();derpy.position.addInPlace(to.scale(3.25*dt));derpy.rotation.y=Math.atan2(to.x,to.z);return;
+ }
+ // At each waypoint Derpy waits until the player catches up before sprinting to the next one.
+ if(derpyPhase<derpyPoints.length-1){
+  if(playerDist<4.6){
+   derpyWait+=dt;
+   if(derpyWait>.42){derpyPhase++;derpyWait=0;flash('Derpy repart en courant !',750)}
+  }else{derpyWait=0;derpy.rotation.y+=.012}
+  return;
+ }
+ // Final point: reveal the demon only once Derpy has actually led the player there.
+ if(playerDist<4.2){derpyComplete=true;document.getElementById('guidePill').classList.add('hidden');startEncounter()}
+}
 function startEncounter(){if(encounterStarted)return;encounterStarted=true;demon.setEnabled(true);demon.position.set(0,.78,15.7);document.getElementById('objective').textContent='⚠ PRÉSENCE DÉMONIAQUE — Affaiblis le démon !';flash('Sussie crie au-dessus de la ruelle… DÉMON REPÉRÉ !',1600);updateEnemyHud()}
 function update(){const dt=Math.min(engine.getDeltaTime()/1000,.033);const f=camera.getForwardRay().direction;f.y=0;f.normalize();const r=BABYLON.Vector3.Cross(BABYLON.Axis.Y,f).normalize();const move=f.scale(input.y).add(r.scale(input.x));if(dodgeTime>0){player.position.addInPlace(dodgeDir.scale(11.5*dt));player.rotation.y=Math.atan2(dodgeDir.x,dodgeDir.z);dodgeTime=Math.max(0,dodgeTime-dt)}else if(move.lengthSquared()>.01){move.normalize();player.position.addInPlace(move.scale(5.2*dt));player.rotation.y=Math.atan2(move.x,move.z)}
  if(!onGround||verticalVelocity!==0){verticalVelocity-=18.5*dt;player.position.y+=verticalVelocity*dt;if(player.position.y<=BASE_Y){player.position.y=BASE_Y;verticalVelocity=0;onGround=true}}
