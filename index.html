@@ -285,10 +285,11 @@ function getMoveAxes(){
 }
 function getFacingDirection(mesh=player){
  const y=Number.isFinite(mesh.rotation.y)?mesh.rotation.y:0;
- return new BABYLON.Vector3(Math.sin(y),0,Math.cos(y)).normalize();
+ // Hunter models are authored facing local -Z, so convert the visible model front to a logical world direction.
+ return new BABYLON.Vector3(-Math.sin(y),0,-Math.cos(y)).normalize();
 }
 function dodge(){if(dodgeTime>0)return;const axes=getMoveAxes();let d=axes.f.scale(input.y).add(axes.r.scale(input.x));if(d.lengthSquared()<.05)d=axes.f.scale(-1);d.normalize();dodgeDir.copyFrom(d);dodgeTime=.22;flash('ESQUIVE !',320)}
-function companionFollow(mesh,offset,dt){if(mesh===player)return;const target=player.position.add(offset);target.y=BASE_Y;const to=target.subtract(mesh.position);if(to.length()>4.2)mesh.position=BABYLON.Vector3.Lerp(mesh.position,target,.13);else mesh.position.addInPlace(to.scale(Math.min(1,4*dt)));if(to.lengthSquared()>.03)mesh.rotation.y=Math.atan2(to.x,to.z)}
+function companionFollow(mesh,offset,dt){if(mesh===player)return;const target=player.position.add(offset);target.y=BASE_Y;const to=target.subtract(mesh.position);if(to.length()>4.2)mesh.position=BABYLON.Vector3.Lerp(mesh.position,target,.13);else mesh.position.addInPlace(to.scale(Math.min(1,4*dt)));if(to.lengthSquared()>.03)mesh.rotation.y=Math.atan2(to.x,to.z)+Math.PI}
 function updateCompanions(dt){const others=Object.values(hunters).filter(h=>h!==player),f=getFacingDirection(player),r=new BABYLON.Vector3(f.z,0,-f.x),back=f.scale(-1.55);companionFollow(others[0],back.add(r.scale(-1.05)),dt);companionFollow(others[1],back.add(r.scale(1.05)),dt)}
 function updateDerpy(dt){
  if(derpyComplete||!document.getElementById('derpyToggle').checked)return;
@@ -324,13 +325,13 @@ function update(){
   const axes=getMoveAxes();
   const ix=Number.isFinite(input.x)?input.x:0, iy=Number.isFinite(input.y)?input.y:0;
   const move=axes.f.scale(iy).add(axes.r.scale(ix));
-  if(dodgeTime>0){player.position.addInPlace(dodgeDir.scale(11.5*dt));player.rotation.y=Math.atan2(dodgeDir.x,dodgeDir.z);dodgeTime=Math.max(0,dodgeTime-dt)}
+  if(dodgeTime>0){player.position.addInPlace(dodgeDir.scale(11.5*dt));player.rotation.y=Math.atan2(dodgeDir.x,dodgeDir.z)+Math.PI;dodgeTime=Math.max(0,dodgeTime-dt)}
   else if(move.lengthSquared()>.01){
     move.normalize();
     const speed=activeKey==='zoey'?5.6:activeKey==='mira'?4.9:5.2;
     const step=move.scale(speed*dt);
     player.position.x+=step.x;player.position.z+=step.z;
-    player.rotation.y=Math.atan2(move.x,move.z);
+    player.rotation.y=Math.atan2(move.x,move.z)+Math.PI;
   }
   if(!onGround||verticalVelocity!==0){verticalVelocity-=18.5*dt;player.position.y+=verticalVelocity*dt;if(player.position.y<=BASE_Y){player.position.y=BASE_Y;verticalVelocity=0;onGround=true}}
   if(!Number.isFinite(player.position.x)||!Number.isFinite(player.position.y)||!Number.isFinite(player.position.z)){player.position.copyFrom(lastGoodPlayerPos);verticalVelocity=0;onGround=true;input.x=input.y=0}
