@@ -53,7 +53,7 @@
   </div>
   <button id="sealBtn" class="hidden">✨ SCELLER</button>
   <div id="sealPanel" class="overlay hidden"><div class="panel"><div class="seal-title">SCEAU DE L’HONMOON</div><div class="seal-subtitle">Complète le sceau</div><div id="question" class="question">8 + 7 = ?</div><div id="answers" class="answers"></div><div id="sealHint" class="seal-hint"></div></div></div>
-  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Prototype v0.4.1 — correction tactile du changement Rumi / Mira / Zoey.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
+  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Prototype v0.4.3 — mouvement caméra corrigé et tir de Zoey orienté vers l’avant.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
 </div>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script>
@@ -164,7 +164,19 @@ function hitDemon(damage){
 }
 function launchZoeyBlade(){
  if(projectile){projectile.dispose();projectile=null}
- projectile=BABYLON.MeshBuilder.CreateSphere('spiritBlade',{diameter:.24,segments:6},scene);projectile.position.copyFrom(player.position);projectile.position.y+=.35;projectile.material=neon('spiritBladeMat'+Date.now(),hunterInfo.zoey.attackColor);projectileTarget=demon&&demon.isEnabled()?demon.position.clone():player.position.add(new BABYLON.Vector3(0,0,-8));projectileLife=.85;
+ const facing=getFacingDirection(player);
+ projectile=BABYLON.MeshBuilder.CreateSphere('spiritBlade',{diameter:.24,segments:6},scene);
+ projectile.position.copyFrom(player.position.add(facing.scale(.72)));
+ projectile.position.y+=.35;
+ projectile.material=neon('spiritBladeMat'+Date.now(),hunterInfo.zoey.attackColor);
+ // Fire forward. Only acquire the demon when it is reasonably in front of Zoey.
+ projectileTarget=player.position.add(facing.scale(12));
+ if(demon&&demon.isEnabled()&&!demonStunned){
+   const toDemon=demon.position.subtract(player.position);toDemon.y=0;
+   const dist=toDemon.length();
+   if(dist>.01){toDemon.normalize();if(BABYLON.Vector3.Dot(facing,toDemon)>.35&&dist<=12)projectileTarget=demon.position.clone()}
+ }
+ projectileLife=.95;
 }
 function attack(){
  if(attackTime>0||sealOpened)return;const info=hunterInfo[activeKey];attackDuration=info.cooldown;attackTime=attackDuration;
@@ -177,9 +189,18 @@ function attack(){
 }
 function jump(){if(!onGround)return;verticalVelocity=7.2;onGround=false}
 function getMoveAxes(){
- const f=camera.target.subtract(camera.position);f.y=0;
- if(!Number.isFinite(f.x)||!Number.isFinite(f.z)||f.lengthSquared()<.0001)f.set(0,0,1);
- f.normalize();const r=new BABYLON.Vector3(f.z,0,-f.x);return {f,r};
+ // ArcRotateCamera angle -> stable ground-plane axes.
+ // This avoids deriving movement from camera.target/camera.position while the target is following the player.
+ const a=Number.isFinite(camera.alpha)?camera.alpha:-Math.PI/2;
+ const f=new BABYLON.Vector3(-Math.cos(a),0,-Math.sin(a));
+ if(f.lengthSquared()<.0001)f.set(0,0,1);
+ f.normalize();
+ const r=new BABYLON.Vector3(f.z,0,-f.x);
+ return {f,r};
+}
+function getFacingDirection(mesh=player){
+ const y=Number.isFinite(mesh.rotation.y)?mesh.rotation.y:0;
+ return new BABYLON.Vector3(Math.sin(y),0,Math.cos(y)).normalize();
 }
 function dodge(){if(dodgeTime>0)return;const axes=getMoveAxes();let d=axes.f.scale(input.y).add(axes.r.scale(input.x));if(d.lengthSquared()<.05)d=axes.f.scale(-1);d.normalize();dodgeDir.copyFrom(d);dodgeTime=.22;flash('ESQUIVE !',320)}
 function companionFollow(mesh,offset,dt){if(mesh===player)return;const target=player.position.add(offset);target.y=BASE_Y;const to=target.subtract(mesh.position);if(to.length()>4.2)mesh.position=BABYLON.Vector3.Lerp(mesh.position,target,.13);else mesh.position.addInPlace(to.scale(Math.min(1,4*dt)));if(to.lengthSquared()>.03)mesh.rotation.y=Math.atan2(to.x,to.z)}
@@ -197,7 +218,10 @@ function updateDerpy(dt){
 function startEncounter(){if(encounterStarted)return;encounterStarted=true;demon.setEnabled(true);demon.position.set(0,.78,15.7);document.getElementById('objective').textContent='⚠ PRÉSENCE DÉMONIAQUE — Essaie les 3 chasseuses !';flash('Sussie crie au-dessus de la ruelle… DÉMON REPÉRÉ !',1600);updateEnemyHud()}
 function updateProjectile(dt){
  if(!projectile)return;projectileLife-=dt;if(projectileLife<=0){projectile.dispose();projectile=null;return}
- const target=(demon&&demon.isEnabled()&&!demonStunned)?demon.position:projectileTarget;const to=target.subtract(projectile.position);to.y*=.35;const dist=to.length();if(dist<.5&&demon&&demon.isEnabled()&&!demonStunned){projectile.dispose();projectile=null;hitDemon(hunterInfo.zoey.damage);return}if(dist>.01){to.normalize();projectile.position.addInPlace(to.scale(13.5*dt));projectile.rotation.z+=.45}
+ const to=projectileTarget.subtract(projectile.position);to.y*=.35;const dist=to.length();
+ // Register a hit only if the blade actually passes close to the demon.
+ if(demon&&demon.isEnabled()&&!demonStunned&&BABYLON.Vector3.Distance(projectile.position,demon.position)<.7){projectile.dispose();projectile=null;hitDemon(hunterInfo.zoey.damage);return}
+ if(dist>.08){to.normalize();projectile.position.addInPlace(to.scale(13.5*dt));projectile.rotation.z+=.45}else{projectile.dispose();projectile=null}
 }
 function animateWeapon(){
  if(attackTime<=0)return;attackTime=Math.max(0,attackTime-Math.min(engine.getDeltaTime()/1000,.033));const phase=1-attackTime/attackDuration;const w=player.metadata.weapon;
@@ -215,7 +239,13 @@ function update(){
   const ix=Number.isFinite(input.x)?input.x:0, iy=Number.isFinite(input.y)?input.y:0;
   const move=axes.f.scale(iy).add(axes.r.scale(ix));
   if(dodgeTime>0){player.position.addInPlace(dodgeDir.scale(11.5*dt));player.rotation.y=Math.atan2(dodgeDir.x,dodgeDir.z);dodgeTime=Math.max(0,dodgeTime-dt)}
-  else if(move.lengthSquared()>.01){move.normalize();player.position.addInPlace(move.scale(activeKey==='zoey'?5.6:activeKey==='mira'?4.9:5.2)*dt);player.rotation.y=Math.atan2(move.x,move.z)}
+  else if(move.lengthSquared()>.01){
+    move.normalize();
+    const speed=activeKey==='zoey'?5.6:activeKey==='mira'?4.9:5.2;
+    const step=move.scale(speed*dt);
+    player.position.x+=step.x;player.position.z+=step.z;
+    player.rotation.y=Math.atan2(move.x,move.z);
+  }
   if(!onGround||verticalVelocity!==0){verticalVelocity-=18.5*dt;player.position.y+=verticalVelocity*dt;if(player.position.y<=BASE_Y){player.position.y=BASE_Y;verticalVelocity=0;onGround=true}}
   if(!Number.isFinite(player.position.x)||!Number.isFinite(player.position.y)||!Number.isFinite(player.position.z)){player.position.copyFrom(lastGoodPlayerPos);verticalVelocity=0;onGround=true;input.x=input.y=0}
   player.position.x=BABYLON.Scalar.Clamp(player.position.x,-5.5,5.5);player.position.z=BABYLON.Scalar.Clamp(player.position.z,-27,25);
