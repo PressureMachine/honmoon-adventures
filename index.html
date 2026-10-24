@@ -338,7 +338,7 @@ html, body { width:100%; height:100%; margin:0; overflow:hidden; background:var(
   function dodge() {
     if (dodgeTime > 0) return;
     const forward = camera.getForwardRay().direction; forward.y=0; forward.normalize();
-    const right = BABYLON.Vector3.Cross(BABYLON.Axis.Y, forward).normalize().scale(-1);
+    const right = BABYLON.Vector3.Cross(BABYLON.Axis.Y, forward).normalize();
     let d = forward.scale(input.y).add(right.scale(input.x));
     if (d.lengthSquared() < .05) d = forward.scale(-1);
     d.normalize();
@@ -350,7 +350,7 @@ html, body { width:100%; height:100%; margin:0; overflow:hidden; background:var(
   function update() {
     const dt = Math.min(engine.getDeltaTime()/1000, .033);
     const forward = camera.getForwardRay().direction; forward.y=0; forward.normalize();
-    const right = BABYLON.Vector3.Cross(BABYLON.Axis.Y, forward).normalize().scale(-1);
+    const right = BABYLON.Vector3.Cross(BABYLON.Axis.Y, forward).normalize();
     const move = forward.scale(input.y).add(right.scale(input.x));
     if (dodgeTime > 0) {
       player.position.addInPlace(dodgeDir.scale(11.5*dt));
