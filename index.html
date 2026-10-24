@@ -1,466 +1,144 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-  <meta name="theme-color" content="#17112d" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>Honmoon Adventures — Desktop Test 0.2</title>
-  
-  <style>
-:root {
-  --bg: #17112d;
-  --glass: rgba(20, 12, 44, .78);
-  --line: rgba(255,255,255,.22);
-  --text: #fff;
-  --pink: #ff4ed7;
-  --cyan: #66e9ff;
-  --gold: #ffd76b;
-}
-* { box-sizing: border-box; }
-html, body { width:100%; height:100%; margin:0; overflow:hidden; background:var(--bg); font-family: system-ui, -apple-system, Segoe UI, sans-serif; touch-action:none; }
-#gameCanvas { width:100%; height:100%; display:block; outline:none; }
-#hud { position:fixed; inset:0; pointer-events:none; color:var(--text); }
-.topbar { display:flex; gap:12px; align-items:center; justify-content:space-between; padding: max(10px, env(safe-area-inset-top)) 14px 0; }
-.character-card, .objective, .icon-btn { pointer-events:auto; background:var(--glass); border:1px solid var(--line); backdrop-filter: blur(8px); box-shadow:0 8px 24px rgba(0,0,0,.25); }
-.character-card { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:16px; }
-.portrait { width:44px; height:44px; border-radius:50%; display:grid; place-items:center; font-weight:800; background:linear-gradient(135deg, #a65cff, #ff5fd7); }
-.character-name { font-size:14px; font-weight:800; letter-spacing:.04em; }
-.dev-tag { font-size:9px; opacity:.65; font-weight:600; }
-.hearts { color:#ff5c83; font-size:18px; letter-spacing:2px; }
-.objective { padding:10px 16px; border-radius:999px; font-size:14px; text-align:center; }
-.icon-btn { width:44px; height:44px; border-radius:14px; color:white; font-size:20px; }
-.message { position:absolute; left:50%; top:16%; transform:translateX(-50%); background:rgba(0,0,0,.58); border:1px solid var(--line); padding:10px 18px; border-radius:999px; font-weight:800; letter-spacing:.03em; }
-.hidden { display:none !important; }
-.joystick { pointer-events:auto; position:absolute; left:24px; bottom:24px; width:132px; height:132px; border-radius:50%; background:rgba(255,255,255,.10); border:2px solid rgba(255,255,255,.22); box-shadow: inset 0 0 24px rgba(0,0,0,.2); }
-.stick { position:absolute; width:62px; height:62px; left:35px; top:35px; border-radius:50%; background:rgba(255,255,255,.32); border:2px solid rgba(255,255,255,.5); }
-.actions { pointer-events:auto; position:absolute; right:22px; bottom:22px; display:grid; grid-template-columns:88px 88px; grid-template-rows:76px 92px; gap:10px; align-items:center; }
-.action { color:white; border:none; border-radius:50%; font-size:28px; background:rgba(37,24,73,.82); border:1px solid var(--line); box-shadow:0 8px 20px rgba(0,0,0,.28); }
-.action span { display:block; font-size:10px; margin-top:2px; }
-.action.primary { grid-column:2; grid-row:1 / span 2; width:92px; height:92px; background:linear-gradient(145deg,#9f4bff,#ff4ed7); }
-.action.secondary { width:76px; height:76px; }
-.seal-panel { pointer-events:auto; position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:radial-gradient(circle at center, rgba(77,32,128,.65), rgba(10,7,24,.88)); padding:20px; }
-.seal-title { color:var(--gold); font-weight:900; letter-spacing:.09em; font-size:clamp(20px,4vw,38px); text-align:center; text-shadow:0 0 18px rgba(255,215,107,.4); }
-.seal-subtitle { margin-top:6px; opacity:.85; }
-.question { margin:22px 0; font-size:clamp(42px,9vw,82px); font-weight:900; }
-.answers { width:min(620px,92vw); display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
-.answers button { border:1px solid rgba(255,255,255,.25); border-radius:18px; padding:18px; font-size:clamp(24px,5vw,42px); color:white; background:rgba(255,255,255,.12); }
-.seal-hint { min-height:34px; margin-top:16px; font-weight:800; }
-.parent-panel { pointer-events:auto; position:absolute; inset:0; display:grid; place-items:center; background:rgba(0,0,0,.55); padding:20px; }
-.panel-card { width:min(520px,92vw); background:#21163f; border:1px solid var(--line); border-radius:22px; padding:22px; box-shadow:0 20px 60px rgba(0,0,0,.4); }
-.panel-title { font-weight:900; font-size:24px; margin-bottom:10px; }
-.panel-card label { display:block; margin:20px 0; }
-.panel-card button { width:100%; padding:14px; border:0; border-radius:14px; background:#fff; color:#21163f; font-weight:800; }
-
-.enemy-hud { position:absolute; top:76px; left:50%; transform:translateX(-50%); width:min(420px,62vw); background:rgba(18,8,36,.88); border:1px solid rgba(255,255,255,.22); border-radius:16px; padding:8px 12px; box-shadow:0 8px 24px rgba(0,0,0,.35); }
-.enemy-name { text-align:center; font-size:12px; font-weight:900; letter-spacing:.08em; margin-bottom:6px; }
-.enemy-bar { height:14px; background:rgba(255,255,255,.12); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,.18); }
-.enemy-fill { height:100%; width:100%; background:linear-gradient(90deg,#ff4b7d,#a64bff); transition:width .18s ease; }
-.seal-action { pointer-events:auto; position:absolute; left:50%; bottom:40px; transform:translateX(-50%); border:none; border-radius:999px; padding:16px 28px; font-size:22px; font-weight:900; color:white; background:linear-gradient(135deg,#6a4cff,#ff4ed7); box-shadow:0 0 28px rgba(255,78,215,.55),0 10px 30px rgba(0,0,0,.35); animation:pulseSeal 1s ease-in-out infinite alternate; }
-@keyframes pulseSeal { from{transform:translateX(-50%) scale(1)} to{transform:translateX(-50%) scale(1.06)} }
-.flash-hit { animation:hitFlash .18s linear; }
-@keyframes hitFlash { 50%{filter:brightness(2.2)} }
-
-@media (max-height: 560px) {
-  .joystick { width:112px; height:112px; }
-  .stick { width:54px; height:54px; left:29px; top:29px; }
-  .actions { transform:scale(.9); transform-origin:bottom right; }
-  .objective { font-size:12px; padding:8px 12px; }
-}
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<meta name="theme-color" content="#15102b" />
+<meta name="mobile-web-app-capable" content="yes" />
+<title>Honmoon Adventures — Prototype 0.3</title>
+<style>
+:root{--bg:#15102b;--glass:rgba(20,12,44,.79);--line:rgba(255,255,255,.2);--text:#fff;--pink:#ff4ed7;--cyan:#65e9ff;--gold:#ffd76b;--violet:#9d5cff}
+*{box-sizing:border-box} html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;touch-action:none}#gameCanvas{width:100%;height:100%;display:block;outline:none}
+#hud{position:fixed;inset:0;pointer-events:none;color:var(--text)}
+.topbar{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:max(8px,env(safe-area-inset-top)) 12px 0}
+.party{display:flex;gap:7px;pointer-events:none}.party-card,.objective,.icon-btn,.enemy-hud{background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.party-card{display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:14px;opacity:.72}.party-card.active{opacity:1;border-color:rgba(190,120,255,.7);box-shadow:0 0 18px rgba(151,75,255,.25)}
+.portrait{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;color:white}.r{background:linear-gradient(135deg,#7f45ff,#e152ff)}.m{background:linear-gradient(135deg,#ff4d98,#ff735f)}.z{background:linear-gradient(135deg,#46cfff,#30e3c0)}
+.char-name{font-size:11px;font-weight:900;letter-spacing:.04em}.mini-state{font-size:9px;opacity:.72}.hearts{font-size:13px;color:#ff6f98;letter-spacing:1px}
+.objective{pointer-events:auto;padding:9px 15px;border-radius:999px;font-size:13px;text-align:center;max-width:42vw}.icon-btn{pointer-events:auto;width:42px;height:42px;border-radius:13px;color:white;font-size:19px}
+.message{position:absolute;left:50%;top:14%;transform:translateX(-50%);background:rgba(0,0,0,.62);border:1px solid var(--line);padding:9px 16px;border-radius:999px;font-weight:850;letter-spacing:.03em;text-align:center;max-width:80vw}
+.hidden{display:none!important}
+.joystick{pointer-events:auto;position:absolute;left:22px;bottom:22px;width:126px;height:126px;border-radius:50%;background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.22);box-shadow:inset 0 0 24px rgba(0,0,0,.2)}.stick{position:absolute;width:58px;height:58px;left:32px;top:32px;border-radius:50%;background:rgba(255,255,255,.32);border:2px solid rgba(255,255,255,.5)}
+.actions{pointer-events:auto;position:absolute;right:20px;bottom:20px;display:grid;grid-template-columns:82px 82px;grid-template-rows:70px 88px;gap:9px;align-items:center}.action{color:white;border:none;border-radius:50%;font-size:26px;background:rgba(37,24,73,.86);border:1px solid var(--line);box-shadow:0 8px 20px rgba(0,0,0,.28)}.action span{display:block;font-size:9px;margin-top:2px}.attack{grid-row:1/3;grid-column:2;background:linear-gradient(145deg,#b53cff,#f151d5);width:88px;height:88px;align-self:end}.dodge{grid-row:2;grid-column:1;width:68px;height:68px}.jump{grid-row:1;grid-column:1;width:68px;height:68px}
+.enemy-hud{position:absolute;top:72px;left:50%;transform:translateX(-50%);width:min(360px,48vw);padding:8px 12px;border-radius:16px;text-align:center}.enemy-title{font-size:11px;font-weight:900;letter-spacing:.08em}.bar{margin-top:5px;height:9px;border-radius:999px;background:rgba(255,255,255,.13);overflow:hidden}.bar-fill{height:100%;width:100%;background:linear-gradient(90deg,#ff3a85,#ff7d4f);transition:width .15s}
+#sealBtn{pointer-events:auto;position:absolute;left:50%;bottom:34px;transform:translateX(-50%);border:none;border-radius:999px;padding:13px 24px;color:white;font-weight:950;font-size:17px;background:linear-gradient(135deg,#734cff,#ff4fc7);box-shadow:0 0 26px rgba(167,74,255,.5)}
+.overlay{pointer-events:auto;position:absolute;inset:0;background:rgba(7,4,18,.78);display:grid;place-items:center;padding:22px}.panel{width:min(640px,92vw);background:rgba(29,17,58,.96);border:1px solid rgba(255,255,255,.2);border-radius:26px;padding:22px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.5)}.seal-title{font-size:13px;letter-spacing:.18em;color:#b9f3ff;font-weight:900}.seal-subtitle{font-size:17px;margin-top:8px}.question{font-size:clamp(30px,6vw,52px);font-weight:950;margin:18px 0}.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px}.answers button{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.09);color:white;border-radius:17px;padding:15px;font-size:20px;font-weight:900}.answers button:active{transform:scale(.97)}.seal-hint{min-height:26px;margin-top:14px;color:#ffd76b;font-weight:850}
+.parent-panel{text-align:left}.parent-panel h2{margin-top:0}.parent-panel button{margin-top:15px;padding:10px 18px;border-radius:12px;border:0}
+.guide-pill{position:absolute;left:50%;top:22%;transform:translateX(-50%);font-size:12px;background:rgba(22,13,51,.8);border:1px solid rgba(101,233,255,.35);border-radius:999px;padding:7px 12px;color:#b9f7ff}
+@media(max-width:900px){.party-card:nth-child(n+2){padding:5px}.party-card:nth-child(n+2) .char-meta{display:none}.party-card{padding:5px 7px}.portrait{width:32px;height:32px}.objective{max-width:40vw;font-size:11px}.joystick{width:112px;height:112px}.stick{width:52px;height:52px;left:28px;top:28px}.actions{transform:scale(.9);transform-origin:bottom right}.enemy-hud{top:64px}}
 </style>
 </head>
 <body>
-  <canvas id="gameCanvas"></canvas>
-
-  <div id="hud">
-    <div class="topbar">
-      <div class="character-card">
-        <div class="portrait placeholder">R</div>
-        <div>
-          <div class="character-name">RUMI <span class="dev-tag">prototype</span></div>
-          <div class="hearts">♥ ♥ ♥</div>
-        </div>
-      </div>
-      <div id="objective" class="objective">MISSION : Approche-toi de la présence étrange…</div>
-      <button id="parentBtn" class="icon-btn" aria-label="Espace parents">⚙</button>
+<canvas id="gameCanvas"></canvas>
+<div id="hud">
+  <div class="topbar">
+    <div class="party">
+      <div class="party-card active"><div class="portrait r">R</div><div class="char-meta"><div class="char-name">RUMI</div><div class="hearts">♥ ♥ ♥</div></div></div>
+      <div class="party-card"><div class="portrait m">M</div><div class="char-meta"><div class="char-name">MIRA</div><div class="mini-state">équipe</div></div></div>
+      <div class="party-card"><div class="portrait z">Z</div><div class="char-meta"><div class="char-name">ZOEY</div><div class="mini-state">équipe</div></div></div>
     </div>
-
-    <div id="message" class="message hidden"></div>
-
-    <div id="enemyHud" class="enemy-hud hidden">
-      <div class="enemy-name">DÉMON DE L’OMBRE</div>
-      <div class="enemy-bar"><div id="enemyFill" class="enemy-fill"></div></div>
-    </div>
-
-    <button id="sealBtn" class="seal-action hidden">✨ SCELLER</button>
-
-    <div id="joystick" class="joystick" aria-label="Joystick">
-      <div id="stick" class="stick"></div>
-    </div>
-
-    <div class="actions">
-      <button id="jumpBtn" class="action secondary">↥<span>Saut</span></button>
-      <button id="dodgeBtn" class="action secondary">↯<span>Esquive</span></button>
-      <button id="attackBtn" class="action primary">⚔<span>Attaque</span></button>
-    </div>
-
-    <div id="sealPanel" class="seal-panel hidden">
-      <div class="seal-title">SCEAU DE L'HONMOON</div>
-      <div class="seal-subtitle">Complète le sceau</div>
-      <div id="question" class="question">8 + 7 = ?</div>
-      <div id="answers" class="answers"></div>
-      <div id="sealHint" class="seal-hint"></div>
-    </div>
-
-    <div id="parentPanel" class="parent-panel hidden">
-      <div class="panel-card">
-        <div class="panel-title">ESPACE PARENTS</div>
-        <p>Prototype : les réglages détaillés arriveront après validation du gameplay.</p>
-        <label><input id="learningToggle" type="checkbox" checked /> Activer le sceau éducatif</label>
-        <button id="closeParent">Fermer</button>
-      </div>
-    </div>
+    <div id="objective" class="objective">MISSION : Suis Derpy.</div>
+    <button id="parentBtn" class="icon-btn">⚙</button>
   </div>
-
-  <script src="https://cdn.babylonjs.com/babylon.js"></script>
-  <script>
-(() => {
-  const canvas = document.getElementById('gameCanvas');
-  const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer:false, stencil:false, adaptToDeviceRatio:true });
-  engine.setHardwareScalingLevel(Math.max(1, window.devicePixelRatio > 1.5 ? 1.35 : 1));
-
-  let player, demon, camera, scene, sword;
-  const input = { x:0, y:0, attacking:false, jump:false, dodge:false };
-  let demonHP = 6;
-  const DEMON_MAX_HP = 6;
-  let playerHP = 3;
-  let playerInvulnerable = 0;
-  let demonAttackCooldown = 1.2;
-  let demonStunned = false;
-  const BASE_Y = 1.05;
-  let verticalVelocity = 0;
-  let onGround = true;
-  let dodgeTime = 0;
-  let dodgeDir = new BABYLON.Vector3(0,0,0);
-  let attackTime = 0;
-  let encounterStarted = false;
-  let sealOpened = false;
-
-  function neonMat(scene, name, color) {
-    const m = new BABYLON.StandardMaterial(name, scene);
-    m.diffuseColor = color.scale(.35);
-    m.emissiveColor = color.scale(.7);
-    m.specularColor = BABYLON.Color3.Black();
-    return m;
-  }
-
-  function createScene() {
-    scene = new BABYLON.Scene(engine);
-    scene.clearColor = new BABYLON.Color4(0.035,0.025,0.085,1);
-    scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
-    scene.fogDensity = .012;
-    scene.fogColor = new BABYLON.Color3(.07,.05,.16);
-
-    const light = new BABYLON.HemisphericLight('hemi', new BABYLON.Vector3(0,1,0), scene);
-    light.intensity = .9;
-
-    const ground = BABYLON.MeshBuilder.CreateGround('ground', { width:48, height:58 }, scene);
-    const gm = new BABYLON.StandardMaterial('groundMat', scene);
-    gm.diffuseColor = new BABYLON.Color3(.07,.08,.12);
-    gm.specularColor = BABYLON.Color3.Black();
-    ground.material = gm;
-
-    // Stylised Seoul test street.
-    const buildingColors = [
-      new BABYLON.Color3(.18,.08,.35),
-      new BABYLON.Color3(.08,.16,.32),
-      new BABYLON.Color3(.22,.09,.18)
-    ];
-    for (let i=0;i<14;i++) {
-      const side = i%2===0 ? -1 : 1;
-      const z = -24 + (i*4);
-      const h = 4 + ((i*7)%6);
-      const b = BABYLON.MeshBuilder.CreateBox('building'+i,{width:7,height:h,depth:3.4},scene);
-      b.position.set(side*8.5,h/2,z);
-      const m = new BABYLON.StandardMaterial('bm'+i,scene);
-      m.diffuseColor = buildingColors[i%buildingColors.length];
-      m.specularColor = BABYLON.Color3.Black();
-      b.material = m;
-      const sign = BABYLON.MeshBuilder.CreatePlane('sign'+i,{width:2.6,height:.8},scene);
-      sign.position.set(side*6.72,2.2,z+.4);
-      sign.rotation.y = side<0 ? Math.PI/2 : -Math.PI/2;
-      sign.material = neonMat(scene,'signm'+i, i%2===0 ? new BABYLON.Color3(1,.22,.75):new BABYLON.Color3(.2,.85,1));
-    }
-
-    // Honmoon portal / alley landmark.
-    const torus = BABYLON.MeshBuilder.CreateTorus('portal',{diameter:3.2,thickness:.18,tessellation:48},scene);
-    torus.position.set(0,1.8,19);
-    torus.rotation.x = Math.PI/2;
-    torus.material = neonMat(scene,'portalMat',new BABYLON.Color3(.45,.25,1));
-
-    // Player is intentionally a placeholder capsule until final film-accurate model is sourced.
-    player = BABYLON.MeshBuilder.CreateCapsule('player',{height:2.1,radius:.45},scene);
-    player.position.set(0,1.05,-18);
-    player.material = neonMat(scene,'playerMat',new BABYLON.Color3(.68,.26,1));
-
-    sword = BABYLON.MeshBuilder.CreateBox('sword',{width:.12,height:1.35,depth:.08},scene);
-    sword.parent = player;
-    sword.position.set(.55,.15,.05);
-    sword.rotation.z = -.5;
-    sword.material = neonMat(scene,'swordMat',new BABYLON.Color3(.9,.8,.25));
-
-    demon = BABYLON.MeshBuilder.CreateSphere('demon',{diameter:1.35,segments:12},scene);
-    demon.position.set(0,.75,15.5);
-    demon.material = neonMat(scene,'demonMat',new BABYLON.Color3(.9,.05,.3));
-    const horn1 = BABYLON.MeshBuilder.CreateCylinder('horn1',{height:.65,diameterTop:0,diameterBottom:.28,tessellation:8},scene);
-    const horn2 = horn1.clone('horn2');
-    horn1.parent=demon; horn2.parent=demon;
-    horn1.position.set(-.35,.65,0); horn2.position.set(.35,.65,0);
-    horn1.rotation.z=-.3; horn2.rotation.z=.3;
-    horn1.material=demon.material; horn2.material=demon.material;
-    const eyeMat=neonMat(scene,'eyeMat',new BABYLON.Color3(1,.82,.12));
-    [-.22,.22].forEach((x,i)=>{ const eye=BABYLON.MeshBuilder.CreateSphere('eye'+i,{diameter:.13,segments:8},scene); eye.parent=demon; eye.position.set(x,.12,-.63); eye.material=eyeMat; });
-
-    camera = new BABYLON.ArcRotateCamera('camera', -Math.PI/2, 1.1, 7.8, player.position.add(new BABYLON.Vector3(0,1,0)), scene);
-    camera.lowerRadiusLimit = 5.5; camera.upperRadiusLimit = 10;
-    camera.lowerBetaLimit=.7; camera.upperBetaLimit=1.35;
-    camera.attachControl(canvas,true);
-    camera.inputs.attached.pointers.buttons = [0];
-    camera.panningSensibility = 0;
-    camera.wheelPrecision = 80;
-
-    return scene;
-  }
-
-  function flash(text, ms=1200) {
-    const el = document.getElementById('message');
-    el.textContent = text; el.classList.remove('hidden');
-    clearTimeout(flash.t); flash.t=setTimeout(()=>el.classList.add('hidden'),ms);
-  }
-
-  function openSeal() {
-    if (sealOpened) return;
-    sealOpened = true;
-    document.getElementById('sealBtn').classList.add('hidden');
-    const panel = document.getElementById('sealPanel');
-    const answers = document.getElementById('answers');
-    const qEl=document.getElementById('question');
-    const sub=document.querySelector('.seal-subtitle');
-    const hint=document.getElementById('sealHint');
-    answers.innerHTML=''; hint.textContent='';
-    const challenges=[
-      {type:'math', subtitle:'Complète le sceau', q:'8 + 7 = ?', options:['13','14','15','16'], answer:'15'},
-      {type:'fr', subtitle:'Complète le sort', q:'Quel mot contient le son « ou » ?', options:['CHAT','LOUP','PAIN','LIT'], answer:'LOUP'}
-    ];
-    const c=challenges[Math.floor(Math.random()*challenges.length)];
-    sub.textContent=c.subtitle; qEl.textContent=c.q;
-    qEl.style.fontSize=c.type==='fr'?'clamp(28px,5vw,46px)':'';
-    c.options.forEach(value=>{
-      const b=document.createElement('button'); b.textContent=value;
-      b.addEventListener('click',()=>{
-        if (value===c.answer) {
-          hint.textContent='✨ SCEAU PARFAIT !';
-          setTimeout(()=>{
-            panel.classList.add('hidden');
-            demon.setEnabled(false);
-            updateEnemyHud();
-            flash('DÉMON SCELLÉ !  ⭐ +100   💎 +2',2200);
-            document.getElementById('objective').textContent='MISSION : Explore librement.';
-            localStorage.setItem('honmoon-stars',String((+localStorage.getItem('honmoon-stars')||0)+100));
-          },800);
-        } else {
-          b.disabled=true; b.style.opacity=.28;
-          hint.textContent='Presque ! Essaie encore.';
-        }
-      });
-      answers.appendChild(b);
-    });
-    panel.classList.remove('hidden');
-  }
-
-  function updateEnemyHud() {
-    const hud=document.getElementById('enemyHud');
-    const fill=document.getElementById('enemyFill');
-    if (!encounterStarted || !demon || !demon.isEnabled()) { hud.classList.add('hidden'); return; }
-    hud.classList.remove('hidden');
-    fill.style.width = `${Math.max(0,demonHP)/DEMON_MAX_HP*100}%`;
-  }
-
-  function updateHearts() {
-    document.querySelector('.hearts').textContent = Array.from({length:3},(_,i)=>i<playerHP?'♥':'♡').join(' ');
-  }
-
-  function damagePlayer() {
-    if (playerInvulnerable>0 || dodgeTime>0 || playerHP<=0) return;
-    playerHP--;
-    playerInvulnerable=1.15;
-    updateHearts();
-    flash(playerHP>0?'AÏE ! Esquive l’attaque !':'Celine te protège !',900);
-    player.scaling.copyFromFloats(1.18,.86,1.18);
-    setTimeout(()=>player.scaling.copyFromFloats(1,1,1),150);
-    if(playerHP<=0){
-      playerHP=3;
-      setTimeout(()=>{ updateHearts(); player.position.set(0,BASE_Y,-10); flash('Celine : « Reste concentrée ! »',1500); },600);
-    }
-  }
-
-  function showSealButton() {
-    demonStunned=true;
-    document.getElementById('sealBtn').classList.remove('hidden');
-    document.getElementById('objective').textContent='Le démon est affaibli — SCELLE-LE !';
-    flash('Rumi : « Maintenant ! Scelle-le ! »',1500);
-  }
-
-  function attack() {
-    if (attackTime > 0 || sealOpened) return;
-    attackTime = .28;
-    if (!demon || !demon.isEnabled() || demonStunned) return;
-    const dist = BABYLON.Vector3.Distance(player.position, demon.position);
-    if (dist < 2.8) {
-      demonHP--;
-      updateEnemyHud();
-      demon.scaling = new BABYLON.Vector3(1.18,.78,1.18);
-      setTimeout(()=>demon.scaling.copyFromFloats(1,1,1),120);
-      flash(`Démon : ${Math.max(demonHP,0)} ♥`, 450);
-      if (demonHP<=1 && document.getElementById('learningToggle').checked) showSealButton();
-      else if (demonHP<=0) { demon.setEnabled(false); updateEnemyHud(); flash('DÉMON VAINCU !',1600); }
-    } else flash('Trop loin !',500);
-  }
-
-  function jump() {
-    if (!onGround) return;
-    verticalVelocity = 7.2;
-    onGround = false;
-  }
-
-  function dodge() {
-    if (dodgeTime > 0) return;
-    const forward = camera.getForwardRay().direction; forward.y=0; forward.normalize();
-    const right = BABYLON.Vector3.Cross(BABYLON.Axis.Y, forward).normalize();
-    let d = forward.scale(input.y).add(right.scale(input.x));
-    if (d.lengthSquared() < .05) d = forward.scale(-1);
-    d.normalize();
-    dodgeDir.copyFrom(d);
-    dodgeTime = .22;
-    flash('ESQUIVE !',350);
-  }
-
-  function update() {
-    const dt = Math.min(engine.getDeltaTime()/1000, .033);
-    const forward = camera.getForwardRay().direction; forward.y=0; forward.normalize();
-    const right = BABYLON.Vector3.Cross(BABYLON.Axis.Y, forward).normalize();
-    const move = forward.scale(input.y).add(right.scale(input.x));
-    if (dodgeTime > 0) {
-      player.position.addInPlace(dodgeDir.scale(11.5*dt));
-      player.rotation.y = Math.atan2(dodgeDir.x, dodgeDir.z);
-      dodgeTime = Math.max(0, dodgeTime-dt);
-    } else if (move.lengthSquared()>.01) {
-      move.normalize();
-      player.position.addInPlace(move.scale(5.2*dt));
-      player.rotation.y = Math.atan2(move.x, move.z);
-    }
-
-    if (!onGround || verticalVelocity !== 0) {
-      verticalVelocity -= 18.5*dt;
-      player.position.y += verticalVelocity*dt;
-      if (player.position.y <= BASE_Y) {
-        player.position.y = BASE_Y;
-        verticalVelocity = 0;
-        onGround = true;
-      }
-    }
-
-    if (attackTime > 0) {
-      attackTime = Math.max(0, attackTime-dt);
-      const phase = 1 - attackTime/.28;
-      sword.rotation.z = -.5 + Math.sin(phase*Math.PI)*1.7;
-      sword.position.x = .55 + Math.sin(phase*Math.PI)*.18;
-      if (attackTime === 0) { sword.rotation.z = -.5; sword.position.x = .55; }
-    }
-
-    player.position.x = BABYLON.Scalar.Clamp(player.position.x,-5.7,5.7);
-    player.position.z = BABYLON.Scalar.Clamp(player.position.z,-26,24);
-    camera.target = BABYLON.Vector3.Lerp(camera.target, player.position.add(new BABYLON.Vector3(0,1,0)), .12);
-
-    if (playerInvulnerable>0) playerInvulnerable=Math.max(0,playerInvulnerable-dt);
-    const dist = BABYLON.Vector3.Distance(player.position, demon.position);
-    if (!encounterStarted && dist < 11) {
-      encounterStarted=true;
-      document.getElementById('objective').textContent='⚠ PRÉSENCE DÉMONIAQUE — Affaiblis le démon !';
-      flash('DÉMON REPÉRÉ !',1500);
-      updateEnemyHud();
-    }
-    if (encounterStarted && demon.isEnabled() && !demonStunned && !sealOpened) {
-      demon.rotation.y += .02;
-      const toPlayer=player.position.subtract(demon.position); toPlayer.y=0;
-      const d=toPlayer.length();
-      if(d>2.15 && d<12){ toPlayer.normalize(); demon.position.addInPlace(toPlayer.scale(1.75*dt)); }
-      demonAttackCooldown-=dt;
-      if(d<=2.25 && demonAttackCooldown<=0){
-        demonAttackCooldown=1.45;
-        const dir=player.position.subtract(demon.position); dir.y=0; if(dir.lengthSquared()>0.01)dir.normalize();
-        demon.position.addInPlace(dir.scale(.55));
-        damagePlayer();
-      }
-    }
-  }
-
-  createScene();
-  scene.onBeforeRenderObservable.add(update);
-  engine.runRenderLoop(()=>scene.render());
-  window.addEventListener('resize',()=>engine.resize());
-
-  document.getElementById('attackBtn').addEventListener('pointerdown',attack);
-  document.getElementById('jumpBtn').addEventListener('pointerdown',jump);
-  document.getElementById('dodgeBtn').addEventListener('pointerdown',dodge);
-  document.getElementById('sealBtn').addEventListener('pointerdown',openSeal);
-
-  // Simple touch joystick.
-  const joy=document.getElementById('joystick'), stick=document.getElementById('stick');
-  let joyId=null;
-  function joyMove(e){
-    if(joyId!==e.pointerId) return;
-    const r=joy.getBoundingClientRect(); const cx=r.left+r.width/2, cy=r.top+r.height/2;
-    let dx=e.clientX-cx, dy=e.clientY-cy; const max=r.width*.34; const len=Math.hypot(dx,dy)||1;
-    if(len>max){dx=dx/len*max;dy=dy/len*max;}
-    stick.style.transform=`translate(${dx}px,${dy}px)`;
-    input.x=dx/max; input.y=-dy/max;
-  }
-  joy.addEventListener('pointerdown',e=>{joyId=e.pointerId; joy.setPointerCapture(e.pointerId); joyMove(e);});
-  joy.addEventListener('pointermove',joyMove);
-  joy.addEventListener('pointerup',e=>{if(joyId===e.pointerId){joyId=null;input.x=input.y=0;stick.style.transform='translate(0,0)';}});
-  joy.addEventListener('pointercancel',e=>{if(joyId===e.pointerId){joyId=null;input.x=input.y=0;stick.style.transform='translate(0,0)';}});
-
-
-  // Desktop keyboard controls for development/testing.
-  const keys = new Set();
-  window.addEventListener('keydown', e => {
-    keys.add(e.code);
-    if (e.code === 'Space') { e.preventDefault(); jump(); }
-    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') dodge();
-    if (e.code === 'KeyF') attack();
-    if (e.code === 'KeyE' && demonStunned) openSeal();
-  });
-  window.addEventListener('keyup', e => keys.delete(e.code));
-  scene.onBeforeRenderObservable.add(() => {
-    let kx = 0, ky = 0;
-    if (keys.has('KeyA') || keys.has('ArrowLeft')) kx -= 1;
-    if (keys.has('KeyD') || keys.has('ArrowRight')) kx += 1;
-    if (keys.has('KeyW') || keys.has('ArrowUp')) ky += 1;
-    if (keys.has('KeyS') || keys.has('ArrowDown')) ky -= 1;
-    if (kx || ky) { input.x = kx; input.y = ky; }
-    else if (joyId === null) { input.x = 0; input.y = 0; }
-  });
-
-  const parent=document.getElementById('parentPanel');
-  document.getElementById('parentBtn').addEventListener('click',()=>parent.classList.remove('hidden'));
-  document.getElementById('closeParent').addEventListener('click',()=>parent.classList.add('hidden'));
-
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  <div id="message" class="message hidden"></div>
+  <div id="guidePill" class="guide-pill">🐯 Derpy semble vouloir te montrer quelque chose…</div>
+  <div id="enemyHud" class="enemy-hud hidden"><div class="enemy-title">DÉMON DES OMBRES</div><div class="bar"><div id="enemyFill" class="bar-fill"></div></div></div>
+  <div id="joystick" class="joystick"><div id="stick" class="stick"></div></div>
+  <div class="actions">
+    <button id="jumpBtn" class="action jump">↟<span>Saut</span></button>
+    <button id="dodgeBtn" class="action dodge">ϟ<span>Esquive</span></button>
+    <button id="attackBtn" class="action attack">⚔<span>Attaque</span></button>
+  </div>
+  <button id="sealBtn" class="hidden">✨ SCELLER</button>
+  <div id="sealPanel" class="overlay hidden"><div class="panel"><div class="seal-title">SCEAU DE L’HONMOON</div><div class="seal-subtitle">Complète le sceau</div><div id="question" class="question">8 + 7 = ?</div><div id="answers" class="answers"></div><div id="sealHint" class="seal-hint"></div></div></div>
+  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Prototype v0.3 — les réglages détaillés viendront après validation du gameplay.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
+</div>
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script>
+(()=>{
+const canvas=document.getElementById('gameCanvas');
+const engine=new BABYLON.Engine(canvas,true,{preserveDrawingBuffer:false,stencil:false,adaptToDeviceRatio:true});
+engine.setHardwareScalingLevel(Math.max(1,window.devicePixelRatio>1.5?1.4:1));
+let scene,camera,player,sword,demon,derpy,mira,zoey,slashFx;
+const input={x:0,y:0};
+const BASE_Y=1.05, DEMON_MAX_HP=7;
+let demonHP=DEMON_MAX_HP,playerHP=3,playerInvulnerable=0,demonAttackCooldown=1.2,demonStunned=false;
+let verticalVelocity=0,onGround=true,dodgeTime=0,dodgeDir=new BABYLON.Vector3(),attackTime=0,encounterStarted=false,sealOpened=false;
+let derpyPhase=0,derpyWait=0,derpyComplete=false;
+const derpyPoints=[new BABYLON.Vector3(-1,.58,-12),new BABYLON.Vector3(2.8,.58,-5),new BABYLON.Vector3(-2.4,.58,4),new BABYLON.Vector3(0,.58,11.5)];
+function mat(name,color,em=.25){const m=new BABYLON.StandardMaterial(name,scene);m.diffuseColor=color.scale(.55);m.emissiveColor=color.scale(em);m.specularColor=BABYLON.Color3.Black();return m}
+function neon(name,color){return mat(name,color,.85)}
+function box(name,w,h,d,x,y,z,color){const b=BABYLON.MeshBuilder.CreateBox(name,{width:w,height:h,depth:d},scene);b.position.set(x,y,z);b.material=mat(name+'Mat',color,.1);return b}
+function createStreet(){
+ const ground=BABYLON.MeshBuilder.CreateGround('ground',{width:48,height:62},scene);ground.material=mat('groundMat',new BABYLON.Color3(.08,.09,.14),.03);
+ const road=BABYLON.MeshBuilder.CreateGround('road',{width:9.5,height:62},scene);road.position.y=.012;road.material=mat('roadMat',new BABYLON.Color3(.035,.04,.065),.02);
+ for(let z=-26;z<28;z+=5){box('mark'+z,.12,.02,2.1,0,.03,z,new BABYLON.Color3(.65,.62,.28));}
+ const cols=[new BABYLON.Color3(.19,.07,.33),new BABYLON.Color3(.06,.15,.29),new BABYLON.Color3(.26,.08,.17),new BABYLON.Color3(.08,.22,.22)];
+ for(let i=0;i<16;i++){const side=i%2===0?-1:1;const z=-27+i*3.7;const h=4.5+((i*5)%5);const b=box('building'+i,7,h,3.1,side*8.4,h/2,z,cols[i%cols.length]);
+  const sign=BABYLON.MeshBuilder.CreatePlane('sign'+i,{width:2.5,height:.72},scene);sign.position.set(side*6.8,2.15,z+.2);sign.rotation.y=side<0?Math.PI/2:-Math.PI/2;sign.material=neon('signM'+i,i%3===0?new BABYLON.Color3(1,.25,.7):i%3===1?new BABYLON.Color3(.22,.9,1):new BABYLON.Color3(.65,.38,1));
+  if(i%2===0){const aw=box('awning'+i,2.6,.16,1.05,side*6.55,1.25,z,new BABYLON.Color3(.45,.1,.32));aw.rotation.z=side<0?-.06:.06;}
+ }
+ // neon lamps
+ for(let z=-22;z<22;z+=7){[-1,1].forEach((side,j)=>{const pole=box('pole'+z+j,.08,2.6,.08,side*4.65,1.3,z,new BABYLON.Color3(.2,.22,.3));const lamp=BABYLON.MeshBuilder.CreateSphere('lamp'+z+j,{diameter:.32,segments:8},scene);lamp.position.set(side*4.65,2.7,z);lamp.material=neon('lampMat'+z+j,j?new BABYLON.Color3(.2,.85,1):new BABYLON.Color3(1,.25,.75));});}
+ // plaza markers / foliage silhouettes
+ for(let i=0;i<8;i++){const side=i%2?-1:1;const z=-18+i*5.8;const trunk=box('treeT'+i,.18,1.5,.18,side*5.3,.75,z,new BABYLON.Color3(.18,.09,.07));const crown=BABYLON.MeshBuilder.CreateSphere('treeC'+i,{diameter:1.45,segments:8},scene);crown.position.set(side*5.3,1.8,z);crown.material=mat('treeCM'+i,new BABYLON.Color3(.35,.14,.28),.2);}
+ // portal landmark
+ const torus=BABYLON.MeshBuilder.CreateTorus('portal',{diameter:3.4,thickness:.18,tessellation:32},scene);torus.position.set(0,1.8,20);torus.rotation.x=Math.PI/2;torus.material=neon('portalMat',new BABYLON.Color3(.45,.25,1));torus.setEnabled(false);
+}
+function createHunter(name,color,pos){const p=BABYLON.MeshBuilder.CreateCapsule(name,{height:2.1,radius:.43},scene);p.position.copyFrom(pos);p.material=neon(name+'Mat',color);return p}
+function createDerpy(){
+ derpy=BABYLON.MeshBuilder.CreateSphere('derpy',{diameter:1.0,segments:10},scene);derpy.scaling.y=.82;derpy.position.copyFrom(derpyPoints[0]);derpy.material=neon('derpyMat',new BABYLON.Color3(.08,.48,.9));
+ const head=BABYLON.MeshBuilder.CreateSphere('derpyHead',{diameter:.66,segments:10},scene);head.parent=derpy;head.position.set(0,.5,-.22);head.material=derpy.material;
+ [-.22,.22].forEach((x,i)=>{const ear=BABYLON.MeshBuilder.CreateCylinder('ear'+i,{height:.42,diameterTop:0,diameterBottom:.26,tessellation:6},scene);ear.parent=head;ear.position.set(x,.35,0);ear.rotation.z=i?-.3:.3;ear.material=derpy.material;});
+ const eyeM=neon('derpyEye',new BABYLON.Color3(1,.8,.12));[-.14,.14].forEach((x,i)=>{const e=BABYLON.MeshBuilder.CreateSphere('de'+i,{diameter:.12,segments:6},scene);e.parent=head;e.position.set(x,.05,-.31);e.material=eyeM;});
+ const tail=BABYLON.MeshBuilder.CreateTorus('tail',{diameter:.6,thickness:.1,tessellation:14,arc:.65},scene);tail.parent=derpy;tail.position.set(.44,.05,.25);tail.rotation.y=Math.PI/2;tail.material=derpy.material;
+}
+function createDemon(){
+ demon=BABYLON.MeshBuilder.CreateSphere('demon',{diameter:1.55,segments:12},scene);demon.position.set(0,.78,16);demon.material=neon('demonMat',new BABYLON.Color3(.88,.04,.28));demon.setEnabled(false);
+ const h1=BABYLON.MeshBuilder.CreateCylinder('h1',{height:.7,diameterTop:0,diameterBottom:.28,tessellation:8},scene),h2=h1.clone('h2');h1.parent=demon;h2.parent=demon;h1.position.set(-.38,.72,0);h2.position.set(.38,.72,0);h1.rotation.z=-.32;h2.rotation.z=.32;h1.material=demon.material;h2.material=demon.material;
+ const eyeM=neon('eyeMat',new BABYLON.Color3(1,.82,.12));[-.23,.23].forEach((x,i)=>{const e=BABYLON.MeshBuilder.CreateSphere('eye'+i,{diameter:.15,segments:8},scene);e.parent=demon;e.position.set(x,.1,-.71);e.material=eyeM;});
+}
+function createScene(){
+ scene=new BABYLON.Scene(engine);scene.clearColor=new BABYLON.Color4(.035,.025,.085,1);scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogDensity=.0105;scene.fogColor=new BABYLON.Color3(.07,.05,.16);
+ const hemi=new BABYLON.HemisphericLight('hemi',new BABYLON.Vector3(0,1,0),scene);hemi.intensity=.82;
+ const point=new BABYLON.PointLight('cityGlow',new BABYLON.Vector3(0,6,0),scene);point.diffuse=new BABYLON.Color3(.55,.32,.8);point.intensity=.35;point.range=35;
+ createStreet();
+ player=createHunter('player',new BABYLON.Color3(.68,.26,1),new BABYLON.Vector3(0,BASE_Y,-19));
+ sword=BABYLON.MeshBuilder.CreateBox('sword',{width:.12,height:1.35,depth:.08},scene);sword.parent=player;sword.position.set(.55,.15,.05);sword.rotation.z=-.5;sword.material=neon('swordMat',new BABYLON.Color3(.95,.78,.22));
+ mira=createHunter('mira',new BABYLON.Color3(.95,.16,.47),new BABYLON.Vector3(-1.1,BASE_Y,-20.3));
+ zoey=createHunter('zoey',new BABYLON.Color3(.08,.72,.83),new BABYLON.Vector3(1.1,BASE_Y,-20.3));
+ createDerpy();createDemon();
+ slashFx=BABYLON.MeshBuilder.CreateTorus('slashFx',{diameter:2.35,thickness:.06,tessellation:24,arc:.56},scene);slashFx.parent=player;slashFx.position.set(0,.25,-.65);slashFx.rotation.x=Math.PI/2;slashFx.material=neon('slashMat',new BABYLON.Color3(.7,.4,1));slashFx.setEnabled(false);
+ camera=new BABYLON.ArcRotateCamera('camera',-Math.PI/2,1.08,7.8,player.position.add(new BABYLON.Vector3(0,1,0)),scene);camera.lowerRadiusLimit=5.5;camera.upperRadiusLimit=10;camera.lowerBetaLimit=.72;camera.upperBetaLimit=1.35;camera.attachControl(canvas,true);camera.inputs.attached.pointers.buttons=[0];camera.panningSensibility=0;camera.wheelPrecision=80;
+ return scene;
+}
+function flash(text,ms=1100){const el=document.getElementById('message');el.textContent=text;el.classList.remove('hidden');clearTimeout(flash.t);flash.t=setTimeout(()=>el.classList.add('hidden'),ms)}
+function updateEnemyHud(){const hud=document.getElementById('enemyHud'),fill=document.getElementById('enemyFill');if(!encounterStarted||!demon.isEnabled()){hud.classList.add('hidden');return}hud.classList.remove('hidden');fill.style.width=`${Math.max(0,demonHP)/DEMON_MAX_HP*100}%`}
+function updateHearts(){document.querySelector('.hearts').textContent=Array.from({length:3},(_,i)=>i<playerHP?'♥':'♡').join(' ')}
+function openSeal(){if(sealOpened)return;sealOpened=true;document.getElementById('sealBtn').classList.add('hidden');const panel=document.getElementById('sealPanel'),answers=document.getElementById('answers'),q=document.getElementById('question'),sub=document.querySelector('.seal-subtitle'),hint=document.getElementById('sealHint');answers.innerHTML='';hint.textContent='';const cs=[{type:'math',sub:'Complète le sceau',q:'8 + 7 = ?',opts:['13','14','15','16'],a:'15'},{type:'fr',sub:'Complète le sort',q:'Quel mot contient le son « ou » ?',opts:['CHAT','LOUP','PAIN','LIT'],a:'LOUP'}];const c=cs[Math.floor(Math.random()*cs.length)];sub.textContent=c.sub;q.textContent=c.q;q.style.fontSize=c.type==='fr'?'clamp(26px,5vw,44px)':'';c.opts.forEach(v=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>{if(v===c.a){hint.textContent='✨ SCEAU PARFAIT !';setTimeout(()=>{panel.classList.add('hidden');demon.setEnabled(false);updateEnemyHud();flash('DÉMON SCELLÉ !  ⭐ +100   💎 +2',2200);document.getElementById('objective').textContent='MISSION : Explore librement.';localStorage.setItem('honmoon-stars',String((+localStorage.getItem('honmoon-stars')||0)+100))},750)}else{b.disabled=true;b.style.opacity=.28;hint.textContent='Presque ! Essaie encore.'}};answers.appendChild(b)});panel.classList.remove('hidden')}
+function showSealButton(){demonStunned=true;document.getElementById('sealBtn').classList.remove('hidden');document.getElementById('objective').textContent='Le démon est affaibli — SCELLE-LE !';flash('Rumi : « Maintenant ! Scelle-le ! »',1500)}
+function damagePlayer(){if(playerInvulnerable>0||dodgeTime>0||playerHP<=0)return;playerHP--;playerInvulnerable=1.15;updateHearts();flash(playerHP>0?'AÏE ! Esquive l’attaque !':'Celine te protège !',900);player.scaling.copyFromFloats(1.16,.86,1.16);setTimeout(()=>player.scaling.copyFromFloats(1,1,1),150);if(playerHP<=0){playerHP=3;setTimeout(()=>{updateHearts();player.position.set(0,BASE_Y,8);flash('Celine : « Reste concentrée ! »',1400)},550)}}
+function attack(){if(attackTime>0||sealOpened)return;attackTime=.32;slashFx.setEnabled(true);setTimeout(()=>slashFx.setEnabled(false),170);if(!demon.isEnabled()||demonStunned)return;const dist=BABYLON.Vector3.Distance(player.position,demon.position);if(dist<2.9){demonHP--;updateEnemyHud();demon.scaling.copyFromFloats(1.22,.75,1.22);demon.material.emissiveColor=new BABYLON.Color3(1,.45,.65);setTimeout(()=>{demon.scaling.copyFromFloats(1,1,1);demon.material.emissiveColor=new BABYLON.Color3(.62,.03,.21)},130);if(demonHP<=1&&document.getElementById('learningToggle').checked)showSealButton();else if(demonHP<=0){demon.setEnabled(false);updateEnemyHud();flash('DÉMON VAINCU !',1500)}}}
+function jump(){if(!onGround)return;verticalVelocity=7.2;onGround=false}
+function dodge(){if(dodgeTime>0)return;const f=camera.getForwardRay().direction;f.y=0;f.normalize();const r=BABYLON.Vector3.Cross(BABYLON.Axis.Y,f).normalize();let d=f.scale(input.y).add(r.scale(input.x));if(d.lengthSquared()<.05)d=f.scale(-1);d.normalize();dodgeDir.copyFrom(d);dodgeTime=.22;flash('ESQUIVE !',320)}
+function companionFollow(mesh,offset,dt){const target=player.position.add(offset);target.y=BASE_Y;const to=target.subtract(mesh.position);if(to.length()>4.2)mesh.position=BABYLON.Vector3.Lerp(mesh.position,target,.13);else mesh.position.addInPlace(to.scale(Math.min(1,4*dt)));if(to.lengthSquared()>.03)mesh.rotation.y=Math.atan2(to.x,to.z)}
+function updateDerpy(dt){if(derpyComplete||!document.getElementById('derpyToggle').checked)return;const p=derpyPoints[Math.min(derpyPhase,derpyPoints.length-1)];const d=BABYLON.Vector3.Distance(player.position,derpy.position);if(d<3.7&&derpyPhase<derpyPoints.length-1){if(derpyWait<=0){derpyWait=.45;flash(derpyPhase===0?'Zoey : « Derpy ? Où est-ce que tu vas ? »':'Derpy repart en courant !',950)}else{derpyWait-=dt;if(derpyWait<=0)derpyPhase++}}
+ const target=derpyPoints[derpyPhase];const to=target.subtract(derpy.position);to.y=0;if(to.length()>.25){to.normalize();derpy.position.addInPlace(to.scale(3.1*dt));derpy.rotation.y=Math.atan2(to.x,to.z)}else derpy.rotation.y+=.012;
+ if(derpyPhase===derpyPoints.length-1&&BABYLON.Vector3.Distance(player.position,derpy.position)<4&&!derpyComplete){derpyComplete=true;document.getElementById('guidePill').classList.add('hidden');startEncounter()}}
+function startEncounter(){if(encounterStarted)return;encounterStarted=true;demon.setEnabled(true);demon.position.set(0,.78,15.7);document.getElementById('objective').textContent='⚠ PRÉSENCE DÉMONIAQUE — Affaiblis le démon !';flash('Sussie crie au-dessus de la ruelle… DÉMON REPÉRÉ !',1600);updateEnemyHud()}
+function update(){const dt=Math.min(engine.getDeltaTime()/1000,.033);const f=camera.getForwardRay().direction;f.y=0;f.normalize();const r=BABYLON.Vector3.Cross(BABYLON.Axis.Y,f).normalize();const move=f.scale(input.y).add(r.scale(input.x));if(dodgeTime>0){player.position.addInPlace(dodgeDir.scale(11.5*dt));player.rotation.y=Math.atan2(dodgeDir.x,dodgeDir.z);dodgeTime=Math.max(0,dodgeTime-dt)}else if(move.lengthSquared()>.01){move.normalize();player.position.addInPlace(move.scale(5.2*dt));player.rotation.y=Math.atan2(move.x,move.z)}
+ if(!onGround||verticalVelocity!==0){verticalVelocity-=18.5*dt;player.position.y+=verticalVelocity*dt;if(player.position.y<=BASE_Y){player.position.y=BASE_Y;verticalVelocity=0;onGround=true}}
+ if(attackTime>0){attackTime=Math.max(0,attackTime-dt);const phase=1-attackTime/.32;sword.rotation.z=-.5+Math.sin(phase*Math.PI)*1.75;sword.position.x=.55+Math.sin(phase*Math.PI)*.18;slashFx.rotation.z=-.6+phase*1.2;if(attackTime===0){sword.rotation.z=-.5;sword.position.x=.55}}
+ player.position.x=BABYLON.Scalar.Clamp(player.position.x,-5.5,5.5);player.position.z=BABYLON.Scalar.Clamp(player.position.z,-27,25);camera.target=BABYLON.Vector3.Lerp(camera.target,player.position.add(new BABYLON.Vector3(0,1,0)),.12);
+ companionFollow(mira,new BABYLON.Vector3(-1.15,0,-1.5),dt);companionFollow(zoey,new BABYLON.Vector3(1.15,0,-1.5),dt);updateDerpy(dt);
+ if(playerInvulnerable>0)playerInvulnerable=Math.max(0,playerInvulnerable-dt);
+ if(encounterStarted&&demon.isEnabled()&&!demonStunned&&!sealOpened){demon.rotation.y+=.025;const to=player.position.subtract(demon.position);to.y=0;const d=to.length();if(d>2.1&&d<13){to.normalize();demon.position.addInPlace(to.scale(1.85*dt))}demonAttackCooldown-=dt;if(d<=2.25&&demonAttackCooldown<=0){demonAttackCooldown=1.4;const dir=player.position.subtract(demon.position);dir.y=0;if(dir.lengthSquared()>.01)dir.normalize();demon.position.addInPlace(dir.scale(.55));damagePlayer()}}
+}
+createScene();scene.onBeforeRenderObservable.add(update);engine.runRenderLoop(()=>scene.render());window.addEventListener('resize',()=>engine.resize());
+document.getElementById('attackBtn').addEventListener('pointerdown',attack);document.getElementById('jumpBtn').addEventListener('pointerdown',jump);document.getElementById('dodgeBtn').addEventListener('pointerdown',dodge);document.getElementById('sealBtn').addEventListener('pointerdown',openSeal);
+const joy=document.getElementById('joystick'),stick=document.getElementById('stick');let joyId=null;function joyMove(e){if(joyId!==e.pointerId)return;const rr=joy.getBoundingClientRect(),cx=rr.left+rr.width/2,cy=rr.top+rr.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=rr.width*.34,len=Math.hypot(dx,dy)||1;if(len>max){dx=dx/len*max;dy=dy/len*max}stick.style.transform=`translate(${dx}px,${dy}px)`;input.x=dx/max;input.y=-dy/max}joy.addEventListener('pointerdown',e=>{joyId=e.pointerId;joy.setPointerCapture(e.pointerId);joyMove(e)});joy.addEventListener('pointermove',joyMove);function joyEnd(e){if(joyId===e.pointerId){joyId=null;input.x=input.y=0;stick.style.transform='translate(0,0)'}}joy.addEventListener('pointerup',joyEnd);joy.addEventListener('pointercancel',joyEnd);
+const keys=new Set();window.addEventListener('keydown',e=>{keys.add(e.code);if(e.code==='Space'){e.preventDefault();jump()}if(e.code==='ShiftLeft'||e.code==='ShiftRight')dodge();if(e.code==='KeyF')attack();if(e.code==='KeyE'&&demonStunned)openSeal()});window.addEventListener('keyup',e=>keys.delete(e.code));scene.onBeforeRenderObservable.add(()=>{let kx=0,ky=0;if(keys.has('KeyA')||keys.has('ArrowLeft'))kx-=1;if(keys.has('KeyD')||keys.has('ArrowRight'))kx+=1;if(keys.has('KeyW')||keys.has('ArrowUp'))ky+=1;if(keys.has('KeyS')||keys.has('ArrowDown'))ky-=1;if(kx||ky){input.x=kx;input.y=ky}else if(joyId===null){input.x=0;input.y=0}});
+const parent=document.getElementById('parentPanel');document.getElementById('parentBtn').onclick=()=>parent.classList.remove('hidden');document.getElementById('closeParent').onclick=()=>parent.classList.add('hidden');
 })();
-
 </script>
-</body>
-</html>
+</body></html>
