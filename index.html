@@ -145,10 +145,13 @@ function switchHunter(key){
  if(!hunters[key]||key===activeKey||sealOpened||attackTime>0||dodgeTime>0)return;
  const old=player,chosen=hunters[key];
  if(!onGround){chosen.position.y=BASE_Y;verticalVelocity=0;onGround=true}
- // Pull the newly selected hunter close enough to avoid a jarring camera jump.
- const d=BABYLON.Vector3.Distance(old.position,chosen.position);if(d>3.2){chosen.position.copyFrom(old.position);chosen.position.x=BABYLON.Scalar.Clamp(chosen.position.x+.7,-5.2,5.2)}
+ const d=BABYLON.Vector3.Distance(old.position,chosen.position);
+ if(!Number.isFinite(d)||d>3.2){chosen.position.copyFrom(old.position);chosen.position.x=BABYLON.Scalar.Clamp(chosen.position.x+.7,-5.2,5.2)}
+ chosen.position.y=BASE_Y;
  activeKey=key;player=chosen;
  slashFx.parent=player;slashFx.position.set(0,.25,-.65);slashFx.material=neon('slashMat'+key,hunterInfo[key].attackColor);
+ // Snap the camera target to a known-safe point on switch; subsequent frames smooth from here.
+ camera.target.copyFrom(player.position);camera.target.y+=1;
  updateCharacterUI();flash(`${hunterInfo[key].name} prend la tête !`,850);
 }
 function updateEnemyHud(){const hud=document.getElementById('enemyHud'),fill=document.getElementById('enemyFill');if(!encounterStarted||!demon.isEnabled()){hud.classList.add('hidden');return}hud.classList.remove('hidden');fill.style.width=`${Math.max(0,demonHP)/DEMON_MAX_HP*100}%`}
@@ -173,7 +176,12 @@ function attack(){
  }
 }
 function jump(){if(!onGround)return;verticalVelocity=7.2;onGround=false}
-function dodge(){if(dodgeTime>0)return;const f=camera.getForwardRay().direction;f.y=0;f.normalize();const r=BABYLON.Vector3.Cross(BABYLON.Axis.Y,f).normalize();let d=f.scale(input.y).add(r.scale(input.x));if(d.lengthSquared()<.05)d=f.scale(-1);d.normalize();dodgeDir.copyFrom(d);dodgeTime=.22;flash('ESQUIVE !',320)}
+function getMoveAxes(){
+ const f=camera.target.subtract(camera.position);f.y=0;
+ if(!Number.isFinite(f.x)||!Number.isFinite(f.z)||f.lengthSquared()<.0001)f.set(0,0,1);
+ f.normalize();const r=new BABYLON.Vector3(f.z,0,-f.x);return {f,r};
+}
+function dodge(){if(dodgeTime>0)return;const axes=getMoveAxes();let d=axes.f.scale(input.y).add(axes.r.scale(input.x));if(d.lengthSquared()<.05)d=axes.f.scale(-1);d.normalize();dodgeDir.copyFrom(d);dodgeTime=.22;flash('ESQUIVE !',320)}
 function companionFollow(mesh,offset,dt){if(mesh===player)return;const target=player.position.add(offset);target.y=BASE_Y;const to=target.subtract(mesh.position);if(to.length()>4.2)mesh.position=BABYLON.Vector3.Lerp(mesh.position,target,.13);else mesh.position.addInPlace(to.scale(Math.min(1,4*dt)));if(to.lengthSquared()>.03)mesh.rotation.y=Math.atan2(to.x,to.z)}
 function updateCompanions(dt){const others=Object.values(hunters).filter(h=>h!==player);companionFollow(others[0],new BABYLON.Vector3(-1.15,0,-1.5),dt);companionFollow(others[1],new BABYLON.Vector3(1.15,0,-1.5),dt)}
 function updateDerpy(dt){
@@ -198,15 +206,31 @@ function animateWeapon(){
  if(activeKey==='zoey'){w.rotation.z=-.45+Math.sin(phase*Math.PI)*.8;if(player.metadata.weapon2)player.metadata.weapon2.rotation.z=.45-Math.sin(phase*Math.PI)*.8}
  if(attackTime===0){if(activeKey==='rumi'){w.rotation.z=-.5;w.position.x=.55}else if(activeKey==='mira'){w.rotation.z=-.35;w.position.x=.58}else{w.rotation.z=-.45;if(player.metadata.weapon2)player.metadata.weapon2.rotation.z=.45}}
 }
+let lastGoodPlayerPos=null,lastUpdateError='';
 function update(){
- const dt=Math.min(engine.getDeltaTime()/1000,.033);const f=camera.getForwardRay().direction;f.y=0;f.normalize();const r=BABYLON.Vector3.Cross(BABYLON.Axis.Y,f).normalize();const move=f.scale(input.y).add(r.scale(input.x));
- if(dodgeTime>0){player.position.addInPlace(dodgeDir.scale(11.5*dt));player.rotation.y=Math.atan2(dodgeDir.x,dodgeDir.z);dodgeTime=Math.max(0,dodgeTime-dt)}else if(move.lengthSquared()>.01){move.normalize();player.position.addInPlace(move.scale(activeKey==='zoey'?5.6:activeKey==='mira'?4.9:5.2)*dt);player.rotation.y=Math.atan2(move.x,move.z)}
- if(!onGround||verticalVelocity!==0){verticalVelocity-=18.5*dt;player.position.y+=verticalVelocity*dt;if(player.position.y<=BASE_Y){player.position.y=BASE_Y;verticalVelocity=0;onGround=true}}
- animateWeapon();updateProjectile(dt);
- player.position.x=BABYLON.Scalar.Clamp(player.position.x,-5.5,5.5);player.position.z=BABYLON.Scalar.Clamp(player.position.z,-27,25);camera.target=BABYLON.Vector3.Lerp(camera.target,player.position.add(new BABYLON.Vector3(0,1,0)),.12);
- updateCompanions(dt);updateDerpy(dt);
- if(playerInvulnerable>0)playerInvulnerable=Math.max(0,playerInvulnerable-dt);
- if(encounterStarted&&demon.isEnabled()&&!demonStunned&&!sealOpened){demon.rotation.y+=.025;const to=player.position.subtract(demon.position);to.y=0;const d=to.length();if(d>2.1&&d<13){to.normalize();demon.position.addInPlace(to.scale(1.85*dt))}demonAttackCooldown-=dt;if(d<=2.25&&demonAttackCooldown<=0){demonAttackCooldown=1.4;const dir=player.position.subtract(demon.position);dir.y=0;if(dir.lengthSquared()>.01)dir.normalize();demon.position.addInPlace(dir.scale(.55));damagePlayer()}}
+ try{
+  const dt=Math.min(engine.getDeltaTime()/1000,.033);
+  if(!lastGoodPlayerPos)lastGoodPlayerPos=player.position.clone();
+  const axes=getMoveAxes();
+  const ix=Number.isFinite(input.x)?input.x:0, iy=Number.isFinite(input.y)?input.y:0;
+  const move=axes.f.scale(iy).add(axes.r.scale(ix));
+  if(dodgeTime>0){player.position.addInPlace(dodgeDir.scale(11.5*dt));player.rotation.y=Math.atan2(dodgeDir.x,dodgeDir.z);dodgeTime=Math.max(0,dodgeTime-dt)}
+  else if(move.lengthSquared()>.01){move.normalize();player.position.addInPlace(move.scale(activeKey==='zoey'?5.6:activeKey==='mira'?4.9:5.2)*dt);player.rotation.y=Math.atan2(move.x,move.z)}
+  if(!onGround||verticalVelocity!==0){verticalVelocity-=18.5*dt;player.position.y+=verticalVelocity*dt;if(player.position.y<=BASE_Y){player.position.y=BASE_Y;verticalVelocity=0;onGround=true}}
+  if(!Number.isFinite(player.position.x)||!Number.isFinite(player.position.y)||!Number.isFinite(player.position.z)){player.position.copyFrom(lastGoodPlayerPos);verticalVelocity=0;onGround=true;input.x=input.y=0}
+  player.position.x=BABYLON.Scalar.Clamp(player.position.x,-5.5,5.5);player.position.z=BABYLON.Scalar.Clamp(player.position.z,-27,25);
+  lastGoodPlayerPos.copyFrom(player.position);
+  animateWeapon();updateProjectile(dt);
+  const safeTarget=player.position.add(new BABYLON.Vector3(0,1,0));
+  camera.target.copyFrom(BABYLON.Vector3.Lerp(camera.target,safeTarget,.12));
+  updateCompanions(dt);updateDerpy(dt);
+  if(playerInvulnerable>0)playerInvulnerable=Math.max(0,playerInvulnerable-dt);
+  if(encounterStarted&&demon.isEnabled()&&!demonStunned&&!sealOpened){demon.rotation.y+=.025;const to=player.position.subtract(demon.position);to.y=0;const d=to.length();if(d>2.1&&d<13){to.normalize();demon.position.addInPlace(to.scale(1.85*dt))}demonAttackCooldown-=dt;if(d<=2.25&&demonAttackCooldown<=0){demonAttackCooldown=1.4;const dir=player.position.subtract(demon.position);dir.y=0;if(dir.lengthSquared()>.01)dir.normalize();demon.position.addInPlace(dir.scale(.55));damagePlayer()}}
+ }catch(err){
+  const msg=String(err&&err.message?err.message:err);
+  if(msg!==lastUpdateError){lastUpdateError=msg;console.error('Honmoon update error',err);flash('Erreur mouvement corrigée — réessaie.',1200)}
+  input.x=input.y=0;
+ }
 }
 createScene();scene.onBeforeRenderObservable.add(update);engine.runRenderLoop(()=>scene.render());window.addEventListener('resize',()=>engine.resize());
 document.getElementById('attackBtn').addEventListener('pointerdown',attack);document.getElementById('jumpBtn').addEventListener('pointerdown',jump);document.getElementById('dodgeBtn').addEventListener('pointerdown',dodge);document.getElementById('sealBtn').addEventListener('pointerdown',openSeal);
@@ -228,7 +252,7 @@ document.querySelectorAll('.party-card').forEach(card=>{
   card.addEventListener('click',e=>handlePartySwitch(card,e),{passive:false});
   card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){handlePartySwitch(card,e)}});
 });
-const joy=document.getElementById('joystick'),stick=document.getElementById('stick');let joyId=null;function joyMove(e){if(joyId!==e.pointerId)return;const rr=joy.getBoundingClientRect(),cx=rr.left+rr.width/2,cy=rr.top+rr.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=rr.width*.34,len=Math.hypot(dx,dy)||1;if(len>max){dx=dx/len*max;dy=dy/len*max}stick.style.transform=`translate(${dx}px,${dy}px)`;input.x=dx/max;input.y=-dy/max}joy.addEventListener('pointerdown',e=>{joyId=e.pointerId;joy.setPointerCapture(e.pointerId);joyMove(e)});joy.addEventListener('pointermove',joyMove);function joyEnd(e){if(joyId===e.pointerId){joyId=null;input.x=input.y=0;stick.style.transform='translate(0,0)'}}joy.addEventListener('pointerup',joyEnd);joy.addEventListener('pointercancel',joyEnd);
+const joy=document.getElementById('joystick'),stick=document.getElementById('stick');let joyId=null;function joyMove(e){if(joyId!==e.pointerId)return;const rr=joy.getBoundingClientRect(),cx=rr.left+rr.width/2,cy=rr.top+rr.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=rr.width*.34,len=Math.hypot(dx,dy)||1;if(len>max){dx=dx/len*max;dy=dy/len*max}stick.style.transform=`translate(${dx}px,${dy}px)`;input.x=dx/max;input.y=-dy/max}joy.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();joyId=e.pointerId;try{joy.setPointerCapture(e.pointerId)}catch(_){}joyMove(e)},{passive:false});joy.addEventListener('pointermove',joyMove);function joyEnd(e){if(joyId===e.pointerId){joyId=null;input.x=input.y=0;stick.style.transform='translate(0,0)'}}joy.addEventListener('pointerup',joyEnd);joy.addEventListener('pointercancel',joyEnd);
 const keys=new Set();window.addEventListener('keydown',e=>{keys.add(e.code);if(e.code==='Space'){e.preventDefault();jump()}if(e.code==='ShiftLeft'||e.code==='ShiftRight')dodge();if(e.code==='KeyF')attack();if(e.code==='KeyE'&&demonStunned)openSeal();if(e.code==='Digit1')switchHunter('rumi');if(e.code==='Digit2')switchHunter('mira');if(e.code==='Digit3')switchHunter('zoey')});window.addEventListener('keyup',e=>keys.delete(e.code));scene.onBeforeRenderObservable.add(()=>{let kx=0,ky=0;if(keys.has('KeyA')||keys.has('ArrowLeft'))kx-=1;if(keys.has('KeyD')||keys.has('ArrowRight'))kx+=1;if(keys.has('KeyW')||keys.has('ArrowUp'))ky+=1;if(keys.has('KeyS')||keys.has('ArrowDown'))ky-=1;if(kx||ky){input.x=kx;input.y=ky}else if(joyId===null){input.x=0;input.y=0}});
 const parent=document.getElementById('parentPanel');document.getElementById('parentBtn').onclick=()=>parent.classList.remove('hidden');document.getElementById('closeParent').onclick=()=>parent.classList.add('hidden');
 })();
