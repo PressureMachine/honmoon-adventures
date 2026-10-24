@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
 <meta name="theme-color" content="#15102b" />
 <meta name="mobile-web-app-capable" content="yes" />
-<title>Honmoon Adventures — Prototype 0.4.1.1</title>
+<title>Honmoon Adventures — Prototype 0.5</title>
 <style>
 :root{--bg:#15102b;--glass:rgba(20,12,44,.79);--line:rgba(255,255,255,.2);--text:#fff;--pink:#ff4ed7;--cyan:#65e9ff;--gold:#ffd76b;--violet:#9d5cff}
 *{box-sizing:border-box} html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;touch-action:none}#gameCanvas{width:100%;height:100%;display:block;outline:none}
@@ -20,7 +20,7 @@
 .hidden{display:none!important}
 .joystick{pointer-events:auto;position:absolute;left:22px;bottom:22px;width:126px;height:126px;border-radius:50%;background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.22);box-shadow:inset 0 0 24px rgba(0,0,0,.2)}.stick{position:absolute;width:58px;height:58px;left:32px;top:32px;border-radius:50%;background:rgba(255,255,255,.32);border:2px solid rgba(255,255,255,.5)}
 .actions{pointer-events:auto;position:absolute;right:20px;bottom:20px;display:grid;grid-template-columns:82px 82px;grid-template-rows:70px 88px;gap:9px;align-items:center}.action{color:white;border:none;border-radius:50%;font-size:26px;background:rgba(37,24,73,.86);border:1px solid var(--line);box-shadow:0 8px 20px rgba(0,0,0,.28)}.action span{display:block;font-size:9px;margin-top:2px}.attack{grid-row:1/3;grid-column:2;background:linear-gradient(145deg,#b53cff,#f151d5);width:88px;height:88px;align-self:end}.dodge{grid-row:2;grid-column:1;width:68px;height:68px}.jump{grid-row:1;grid-column:1;width:68px;height:68px}
-.enemy-hud{position:absolute;top:72px;left:50%;transform:translateX(-50%);width:min(360px,48vw);padding:8px 12px;border-radius:16px;text-align:center}.enemy-title{font-size:11px;font-weight:900;letter-spacing:.08em}.bar{margin-top:5px;height:9px;border-radius:999px;background:rgba(255,255,255,.13);overflow:hidden}.bar-fill{height:100%;width:100%;background:linear-gradient(90deg,#ff3a85,#ff7d4f);transition:width .15s}
+.enemy-hud{position:absolute;top:72px;left:50%;transform:translateX(-50%);width:min(360px,48vw);padding:8px 12px;border-radius:16px;text-align:center}.enemy-title{font-size:11px;font-weight:900;letter-spacing:.08em}.bar{margin-top:5px;height:9px;border-radius:999px;background:rgba(255,255,255,.13);overflow:hidden}.bar-fill{height:100%;width:100%;background:linear-gradient(90deg,#ff3a85,#ff7d4f);transition:width .15s}.shield-row{display:flex;gap:7px;align-items:center;margin-top:6px;font-size:9px;color:#b9f7ff;font-weight:850}.shield-bar{flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}.shield-fill{height:100%;width:100%;background:linear-gradient(90deg,#59d7ff,#a35cff);transition:width .15s}.combo-chip{position:absolute;left:50%;bottom:22%;transform:translateX(-50%);padding:7px 12px;border-radius:999px;background:rgba(26,14,58,.86);border:1px solid rgba(255,255,255,.2);font-size:11px;font-weight:900;letter-spacing:.04em;color:#fff}
 #sealBtn{pointer-events:auto;position:absolute;left:50%;bottom:34px;transform:translateX(-50%);border:none;border-radius:999px;padding:13px 24px;color:white;font-weight:950;font-size:17px;background:linear-gradient(135deg,#734cff,#ff4fc7);box-shadow:0 0 26px rgba(167,74,255,.5)}
 .overlay{pointer-events:auto;position:absolute;inset:0;background:rgba(7,4,18,.78);display:grid;place-items:center;padding:22px}.panel{width:min(640px,92vw);background:rgba(29,17,58,.96);border:1px solid rgba(255,255,255,.2);border-radius:26px;padding:22px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.5)}.seal-title{font-size:13px;letter-spacing:.18em;color:#b9f3ff;font-weight:900}.seal-subtitle{font-size:17px;margin-top:8px}.question{font-size:clamp(30px,6vw,52px);font-weight:950;margin:18px 0}.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px}.answers button{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.09);color:white;border-radius:17px;padding:15px;font-size:20px;font-weight:900}.answers button:active{transform:scale(.97)}.seal-hint{min-height:26px;margin-top:14px;color:#ffd76b;font-weight:850}
 .parent-panel{text-align:left}.parent-panel h2{margin-top:0}.parent-panel button{margin-top:15px;padding:10px 18px;border-radius:12px;border:0}
@@ -34,8 +34,8 @@
 <div id="hud">
   <div class="topbar">
     <div class="party" id="partyBar">
-      <div id="card-rumi" class="party-card active" data-char="rumi"><div class="portrait r">R</div><div class="char-meta"><div class="char-name">RUMI</div><div class="mini-state">équilibrée</div></div></div>
-      <div id="card-mira" class="party-card" data-char="mira"><div class="portrait m">M</div><div class="char-meta"><div class="char-name">MIRA</div><div class="mini-state">puissante</div></div></div>
+      <div id="card-rumi" class="party-card active" data-char="rumi"><div class="portrait r">R</div><div class="char-meta"><div class="char-name">RUMI</div><div class="mini-state">combo</div></div></div>
+      <div id="card-mira" class="party-card" data-char="mira"><div class="portrait m">M</div><div class="char-meta"><div class="char-name">MIRA</div><div class="mini-state">brise-bouclier</div></div></div>
       <div id="card-zoey" class="party-card" data-char="zoey"><div class="portrait z">Z</div><div class="char-meta"><div class="char-name">ZOEY</div><div class="mini-state">distance</div></div></div>
     </div>
     <div id="objective" class="objective">MISSION : Suis Derpy.</div>
@@ -44,7 +44,8 @@
   <div id="message" class="message hidden"></div>
   <div id="guidePill" class="guide-pill">🐯 Derpy semble vouloir te montrer quelque chose…</div>
   <div id="combatPill" class="combat-pill"><b>RUMI</b>Saingeom • équilibrée</div>
-  <div id="enemyHud" class="enemy-hud hidden"><div class="enemy-title">DÉMON DES OMBRES</div><div class="bar"><div id="enemyFill" class="bar-fill"></div></div></div>
+  <div id="enemyHud" class="enemy-hud hidden"><div id="enemyTitle" class="enemy-title">BRUTE DES OMBRES</div><div class="bar"><div id="enemyFill" class="bar-fill"></div></div><div id="shieldRow" class="shield-row"><span>BOUCLIER</span><div class="shield-bar"><div id="shieldFill" class="shield-fill"></div></div></div></div>
+  <div id="comboChip" class="combo-chip hidden">COMBO x1</div>
   <div id="joystick" class="joystick"><div id="stick" class="stick"></div></div>
   <div class="actions">
     <button id="jumpBtn" class="action jump">↟<span>Saut</span></button>
@@ -53,7 +54,7 @@
   </div>
   <button id="sealBtn" class="hidden">✨ SCELLER</button>
   <div id="sealPanel" class="overlay hidden"><div class="panel"><div class="seal-title">SCEAU DE L’HONMOON</div><div class="seal-subtitle">Complète le sceau</div><div id="question" class="question">8 + 7 = ?</div><div id="answers" class="answers"></div><div id="sealHint" class="seal-hint"></div></div></div>
-  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Prototype v0.4.3 — mouvement caméra corrigé et tir de Zoey orienté vers l’avant.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
+  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Prototype v0.5 — styles de combat distincts, combos de Rumi, brise-bouclier de Mira et tirs améliorés de Zoey.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
 </div>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script>
@@ -61,21 +62,22 @@
 const canvas=document.getElementById('gameCanvas');
 const engine=new BABYLON.Engine(canvas,true,{preserveDrawingBuffer:false,stencil:false,adaptToDeviceRatio:true});
 engine.setHardwareScalingLevel(Math.max(1,window.devicePixelRatio>1.5?1.4:1));
-let scene,camera,player,demon,derpy,slashFx;
+let scene,camera,player,demon,derpy,slashFx,activeRing,impactRing;
 let rumi,mira,zoey;
 const hunters={};
 const input={x:0,y:0};
-const BASE_Y=1.05, DEMON_MAX_HP=9;
+const BASE_Y=1.05, DEMON_MAX_HP=12, DEMON_MAX_SHIELD=5;
 const hunterInfo={
- rumi:{name:'RUMI',desc:'Saingeom • équilibrée',color:new BABYLON.Color3(.68,.26,1),attackColor:new BABYLON.Color3(.75,.46,1),range:3.0,damage:1,cooldown:.31},
- mira:{name:'MIRA',desc:'Gok-do • frappe puissante',color:new BABYLON.Color3(.95,.16,.47),attackColor:new BABYLON.Color3(1,.23,.48),range:3.45,damage:2,cooldown:.48},
- zoey:{name:'ZOEY',desc:'Shin-kal • attaque à distance',color:new BABYLON.Color3(.08,.72,.83),attackColor:new BABYLON.Color3(.22,.92,1),range:9.5,damage:1,cooldown:.37}
+ rumi:{name:'RUMI',desc:'Saingeom • combo 3 coups',color:new BABYLON.Color3(.68,.26,1),attackColor:new BABYLON.Color3(.75,.46,1),range:3.0,damage:1,cooldown:.26},
+ mira:{name:'MIRA',desc:'Gok-do • brise-bouclier',color:new BABYLON.Color3(.95,.16,.47),attackColor:new BABYLON.Color3(1,.23,.48),range:3.45,damage:2,cooldown:.46},
+ zoey:{name:'ZOEY',desc:'Shin-kal • distance',color:new BABYLON.Color3(.08,.72,.83),attackColor:new BABYLON.Color3(.22,.92,1),range:9.5,damage:1,cooldown:.34}
 };
 let activeKey='rumi';
-let demonHP=DEMON_MAX_HP,playerHP=3,playerInvulnerable=0,demonAttackCooldown=1.2,demonStunned=false;
+let demonHP=DEMON_MAX_HP,demonShield=DEMON_MAX_SHIELD,playerHP=3,playerInvulnerable=0,demonAttackCooldown=1.2,demonStunned=false;
 let verticalVelocity=0,onGround=true,dodgeTime=0,dodgeDir=new BABYLON.Vector3(),attackTime=0,attackDuration=.31,encounterStarted=false,sealOpened=false;
 let derpyPhase=1,derpyWait=0,derpyComplete=false,derpyStarted=false,derpyPaused=false;
-let projectile=null,projectileTarget=null,projectileLife=0;
+let projectile=null,projectileTarget=null,projectileLife=0,projectileGhosts=[];
+let rumiCombo=0,rumiComboTimer=0;
 const derpyPoints=[new BABYLON.Vector3(-1,.58,-12),new BABYLON.Vector3(2.8,.58,-5),new BABYLON.Vector3(-2.4,.58,4),new BABYLON.Vector3(0,.58,11.5)];
 function mat(name,color,em=.25){const m=new BABYLON.StandardMaterial(name,scene);m.diffuseColor=color.scale(.55);m.emissiveColor=color.scale(em);m.specularColor=BABYLON.Color3.Black();return m}
 function neon(name,color){return mat(name,color,.85)}
@@ -128,6 +130,8 @@ function createScene(){
  hunters.rumi=rumi;hunters.mira=mira;hunters.zoey=zoey;player=rumi;
  createDerpy();createDemon();
  slashFx=BABYLON.MeshBuilder.CreateTorus('slashFx',{diameter:2.35,thickness:.06,tessellation:24,arc:.56},scene);slashFx.parent=player;slashFx.position.set(0,.25,-.65);slashFx.rotation.x=Math.PI/2;slashFx.material=neon('slashMat',hunterInfo.rumi.attackColor);slashFx.setEnabled(false);
+ activeRing=BABYLON.MeshBuilder.CreateTorus('activeRing',{diameter:1.45,thickness:.045,tessellation:24},scene);activeRing.parent=player;activeRing.position.set(0,-1.01,0);activeRing.rotation.x=Math.PI/2;activeRing.material=neon('activeRingMat',hunterInfo.rumi.attackColor);
+ impactRing=BABYLON.MeshBuilder.CreateTorus('impactRing',{diameter:1.2,thickness:.07,tessellation:20},scene);impactRing.rotation.x=Math.PI/2;impactRing.material=neon('impactRingMat',hunterInfo.mira.attackColor);impactRing.setEnabled(false);
  camera=new BABYLON.ArcRotateCamera('camera',-Math.PI/2,1.08,7.8,player.position.add(new BABYLON.Vector3(0,1,0)),scene);camera.lowerRadiusLimit=5.5;camera.upperRadiusLimit=10;camera.lowerBetaLimit=.72;camera.upperBetaLimit=1.35;camera.attachControl(canvas,true);camera.inputs.attached.pointers.buttons=[0];camera.panningSensibility=0;camera.wheelPrecision=80;
  updateCharacterUI();
  return scene;
@@ -149,26 +153,34 @@ function switchHunter(key){
  if(!Number.isFinite(d)||d>3.2){chosen.position.copyFrom(old.position);chosen.position.x=BABYLON.Scalar.Clamp(chosen.position.x+.7,-5.2,5.2)}
  chosen.position.y=BASE_Y;
  activeKey=key;player=chosen;
- slashFx.parent=player;slashFx.position.set(0,.25,-.65);slashFx.material=neon('slashMat'+key,hunterInfo[key].attackColor);
+ slashFx.parent=player;slashFx.position.set(0,.25,-.65);slashFx.material=neon('slashMat'+key,hunterInfo[key].attackColor);activeRing.parent=player;activeRing.material=neon('activeRingMat'+key,hunterInfo[key].attackColor);rumiCombo=0;rumiComboTimer=0;document.getElementById('comboChip').classList.add('hidden');
  // Snap the camera target to a known-safe point on switch; subsequent frames smooth from here.
  camera.target.copyFrom(player.position);camera.target.y+=1;
  updateCharacterUI();flash(`${hunterInfo[key].name} prend la tête !`,850);
 }
-function updateEnemyHud(){const hud=document.getElementById('enemyHud'),fill=document.getElementById('enemyFill');if(!encounterStarted||!demon.isEnabled()){hud.classList.add('hidden');return}hud.classList.remove('hidden');fill.style.width=`${Math.max(0,demonHP)/DEMON_MAX_HP*100}%`}
+function updateEnemyHud(){const hud=document.getElementById('enemyHud'),fill=document.getElementById('enemyFill'),shield=document.getElementById('shieldFill'),row=document.getElementById('shieldRow'),title=document.getElementById('enemyTitle');if(!encounterStarted||!demon.isEnabled()){hud.classList.add('hidden');return}hud.classList.remove('hidden');fill.style.width=`${Math.max(0,demonHP)/DEMON_MAX_HP*100}%`;shield.style.width=`${Math.max(0,demonShield)/DEMON_MAX_SHIELD*100}%`;row.classList.toggle('hidden',demonShield<=0);title.textContent=demonShield>0?'BRUTE DES OMBRES • PROTÉGÉE':'BRUTE DES OMBRES • VULNÉRABLE'}
 function openSeal(){if(sealOpened)return;sealOpened=true;document.getElementById('sealBtn').classList.add('hidden');const panel=document.getElementById('sealPanel'),answers=document.getElementById('answers'),q=document.getElementById('question'),sub=document.querySelector('.seal-subtitle'),hint=document.getElementById('sealHint');answers.innerHTML='';hint.textContent='';const cs=[{type:'math',sub:'Complète le sceau',q:'8 + 7 = ?',opts:['13','14','15','16'],a:'15'},{type:'fr',sub:'Complète le sort',q:'Quel mot contient le son « ou » ?',opts:['CHAT','LOUP','PAIN','LIT'],a:'LOUP'}];const c=cs[Math.floor(Math.random()*cs.length)];sub.textContent=c.sub;q.textContent=c.q;q.style.fontSize=c.type==='fr'?'clamp(26px,5vw,44px)':'';c.opts.forEach(v=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>{if(v===c.a){hint.textContent='✨ SCEAU PARFAIT !';setTimeout(()=>{panel.classList.add('hidden');demon.setEnabled(false);updateEnemyHud();flash('DÉMON SCELLÉ !  ⭐ +100   💎 +2',2200);document.getElementById('objective').textContent='MISSION : Explore librement.';localStorage.setItem('honmoon-stars',String((+localStorage.getItem('honmoon-stars')||0)+100))},750)}else{b.disabled=true;b.style.opacity=.28;hint.textContent='Presque ! Essaie encore.'}};answers.appendChild(b)});panel.classList.remove('hidden')}
 function showSealButton(){demonStunned=true;document.getElementById('sealBtn').classList.remove('hidden');document.getElementById('objective').textContent='Le démon est affaibli — SCELLE-LE !';flash('HUNTR/X : « Maintenant ! Scelle-le ! »',1500)}
 function damagePlayer(){if(playerInvulnerable>0||dodgeTime>0||playerHP<=0)return;playerHP--;playerInvulnerable=1.15;flash(playerHP>0?'AÏE ! Esquive l’attaque !':'Celine te protège !',900);player.scaling.copyFromFloats(1.16,.86,1.16);setTimeout(()=>player.scaling.copyFromFloats(1,1,1),150);if(playerHP<=0){playerHP=3;setTimeout(()=>{player.position.set(0,BASE_Y,8);flash('Celine : « Reste concentrée ! »',1400)},550)}}
-function hitDemon(damage){
- if(!demon.isEnabled()||demonStunned)return;demonHP-=damage;updateEnemyHud();demon.scaling.copyFromFloats(1.22,.75,1.22);demon.material.emissiveColor=new BABYLON.Color3(1,.45,.65);setTimeout(()=>{if(demon&&demon.isEnabled()){demon.scaling.copyFromFloats(1,1,1);demon.material.emissiveColor=new BABYLON.Color3(.62,.03,.21)}},130);
+function showImpactFx(){
+ impactRing.position.copyFrom(demon.position);impactRing.position.y=.08;impactRing.scaling.copyFromFloats(.6,.6,.6);impactRing.setEnabled(true);let t=0;const obs=scene.onBeforeRenderObservable.add(()=>{t+=Math.min(engine.getDeltaTime()/1000,.033);const sc=.6+t*5;impactRing.scaling.copyFromFloats(sc,sc,sc);if(t>.18){impactRing.setEnabled(false);scene.onBeforeRenderObservable.remove(obs)}});
+}
+function hitDemon(damage,sourceKey=activeKey){
+ if(!demon.isEnabled()||demonStunned)return;
+ if(demonShield>0){const shieldDamage=sourceKey==='mira'?3:1;demonShield=Math.max(0,demonShield-shieldDamage);showImpactFx();demon.scaling.copyFromFloats(1.18,.82,1.18);setTimeout(()=>{if(demon&&demon.isEnabled())demon.scaling.copyFromFloats(1,1,1)},110);if(demonShield===0)flash('💥 BOUCLIER BRISÉ !',1000);else if(sourceKey==='mira')flash('MIRA FRACTURE LE BOUCLIER !',650);updateEnemyHud();return}
+ demonHP-=damage;updateEnemyHud();demon.scaling.copyFromFloats(1.22,.75,1.22);demon.material.emissiveColor=new BABYLON.Color3(1,.45,.65);setTimeout(()=>{if(demon&&demon.isEnabled()){demon.scaling.copyFromFloats(1,1,1);demon.material.emissiveColor=new BABYLON.Color3(.62,.03,.21)}},130);
+ if(sourceKey==='mira'){const push=demon.position.subtract(player.position);push.y=0;if(push.lengthSquared()>.01){push.normalize();demon.position.addInPlace(push.scale(.32))}showImpactFx()}
  if(demonHP<=1&&document.getElementById('learningToggle').checked)showSealButton();else if(demonHP<=0){demon.setEnabled(false);updateEnemyHud();flash('DÉMON VAINCU !',1500)}
 }
+function clearProjectile(){if(projectile){projectile.dispose();projectile=null}projectileGhosts.forEach(g=>{try{g.dispose()}catch(_){}});projectileGhosts=[]}
 function launchZoeyBlade(){
- if(projectile){projectile.dispose();projectile=null}
+ clearProjectile();
  const facing=getFacingDirection(player);
  projectile=BABYLON.MeshBuilder.CreateSphere('spiritBlade',{diameter:.24,segments:6},scene);
  projectile.position.copyFrom(player.position.add(facing.scale(.72)));
  projectile.position.y+=.35;
- projectile.material=neon('spiritBladeMat'+Date.now(),hunterInfo.zoey.attackColor);
+ projectile.material=neon('spiritBladeMat'+Date.now(),hunterInfo.zoey.attackColor);projectile.scaling.copyFromFloats(1.7,.7,.7);
+ for(let i=0;i<3;i++){const g=BABYLON.MeshBuilder.CreateSphere('bladeGhost'+i,{diameter:.18-i*.025,segments:5},scene);g.position.copyFrom(projectile.position);g.material=projectile.material;g.visibility=.52-i*.12;projectileGhosts.push(g)}
  // Fire forward. Only acquire the demon when it is reasonably in front of Zoey.
  projectileTarget=player.position.add(facing.scale(12));
  if(demon&&demon.isEnabled()&&!demonStunned){
@@ -178,13 +190,18 @@ function launchZoeyBlade(){
  }
  projectileLife=.95;
 }
+function showCombo(step){const chip=document.getElementById('comboChip');if(step<=1){chip.classList.add('hidden');return}chip.textContent=step===3?'✨ COMBO x3 — FINISH !':`COMBO x${step}`;chip.classList.remove('hidden');clearTimeout(showCombo.t);showCombo.t=setTimeout(()=>chip.classList.add('hidden'),700)}
 function attack(){
- if(attackTime>0||sealOpened)return;const info=hunterInfo[activeKey];attackDuration=info.cooldown;attackTime=attackDuration;
- if(activeKey==='zoey'){
-   launchZoeyBlade();
+ if(attackTime>0||sealOpened)return;const info=hunterInfo[activeKey];
+ if(activeKey==='rumi'){
+   rumiCombo=(rumiComboTimer>0)?(rumiCombo%3)+1:1;rumiComboTimer=.72;attackDuration=rumiCombo===3?.34:info.cooldown;attackTime=attackDuration;showCombo(rumiCombo);
+   const scale=rumiCombo===3?1.45:rumiCombo===2?1.15:1;slashFx.scaling.copyFromFloats(scale,scale,1);slashFx.setEnabled(true);setTimeout(()=>slashFx.setEnabled(false),rumiCombo===3?230:165);
+   if(demon.isEnabled()&&!demonStunned&&BABYLON.Vector3.Distance(player.position,demon.position)<info.range)hitDemon(rumiCombo===3?2:1,'rumi');
+ }else if(activeKey==='mira'){
+   attackDuration=info.cooldown;attackTime=attackDuration;slashFx.scaling.copyFromFloats(1.42,1.42,1);slashFx.setEnabled(true);setTimeout(()=>slashFx.setEnabled(false),220);
+   if(demon.isEnabled()&&!demonStunned&&BABYLON.Vector3.Distance(player.position,demon.position)<info.range)hitDemon(info.damage,'mira');
  }else{
-   slashFx.scaling.copyFromFloats(activeKey==='mira'?1.32:1,activeKey==='mira'?1.32:1,1);slashFx.setEnabled(true);setTimeout(()=>slashFx.setEnabled(false),activeKey==='mira'?210:170);
-   if(demon.isEnabled()&&!demonStunned&&BABYLON.Vector3.Distance(player.position,demon.position)<info.range)hitDemon(info.damage);
+   attackDuration=info.cooldown;attackTime=attackDuration;launchZoeyBlade();
  }
 }
 function jump(){if(!onGround)return;verticalVelocity=7.2;onGround=false}
@@ -204,7 +221,7 @@ function getFacingDirection(mesh=player){
 }
 function dodge(){if(dodgeTime>0)return;const axes=getMoveAxes();let d=axes.f.scale(input.y).add(axes.r.scale(input.x));if(d.lengthSquared()<.05)d=axes.f.scale(-1);d.normalize();dodgeDir.copyFrom(d);dodgeTime=.22;flash('ESQUIVE !',320)}
 function companionFollow(mesh,offset,dt){if(mesh===player)return;const target=player.position.add(offset);target.y=BASE_Y;const to=target.subtract(mesh.position);if(to.length()>4.2)mesh.position=BABYLON.Vector3.Lerp(mesh.position,target,.13);else mesh.position.addInPlace(to.scale(Math.min(1,4*dt)));if(to.lengthSquared()>.03)mesh.rotation.y=Math.atan2(to.x,to.z)}
-function updateCompanions(dt){const others=Object.values(hunters).filter(h=>h!==player);companionFollow(others[0],new BABYLON.Vector3(-1.15,0,-1.5),dt);companionFollow(others[1],new BABYLON.Vector3(1.15,0,-1.5),dt)}
+function updateCompanions(dt){const others=Object.values(hunters).filter(h=>h!==player),f=getFacingDirection(player),r=new BABYLON.Vector3(f.z,0,-f.x),back=f.scale(-1.55);companionFollow(others[0],back.add(r.scale(-1.05)),dt);companionFollow(others[1],back.add(r.scale(1.05)),dt)}
 function updateDerpy(dt){
  if(derpyComplete||!document.getElementById('derpyToggle').checked)return;
  const playerDist=BABYLON.Vector3.Distance(player.position,derpy.position);
@@ -215,13 +232,12 @@ function updateDerpy(dt){
  if(derpyPhase<derpyPoints.length-1){if(playerDist<4.6){derpyWait+=dt;if(derpyWait>.42){derpyPhase++;derpyWait=0;flash('Derpy repart en courant !',750)}}else{derpyWait=0;derpy.rotation.y+=.012}return}
  if(playerDist<4.2){derpyComplete=true;document.getElementById('guidePill').classList.add('hidden');startEncounter()}
 }
-function startEncounter(){if(encounterStarted)return;encounterStarted=true;demon.setEnabled(true);demon.position.set(0,.78,15.7);document.getElementById('objective').textContent='⚠ PRÉSENCE DÉMONIAQUE — Essaie les 3 chasseuses !';flash('Sussie crie au-dessus de la ruelle… DÉMON REPÉRÉ !',1600);updateEnemyHud()}
+function startEncounter(){if(encounterStarted)return;encounterStarted=true;demonHP=DEMON_MAX_HP;demonShield=DEMON_MAX_SHIELD;demon.setEnabled(true);demon.position.set(0,.78,15.7);document.getElementById('objective').textContent='⚠ BRUTE DES OMBRES — brise son bouclier !';flash('Sussie crie au-dessus de la ruelle… DÉMON REPÉRÉ !',1600);updateEnemyHud()}
 function updateProjectile(dt){
- if(!projectile)return;projectileLife-=dt;if(projectileLife<=0){projectile.dispose();projectile=null;return}
- const to=projectileTarget.subtract(projectile.position);to.y*=.35;const dist=to.length();
- // Register a hit only if the blade actually passes close to the demon.
- if(demon&&demon.isEnabled()&&!demonStunned&&BABYLON.Vector3.Distance(projectile.position,demon.position)<.7){projectile.dispose();projectile=null;hitDemon(hunterInfo.zoey.damage);return}
- if(dist>.08){to.normalize();projectile.position.addInPlace(to.scale(13.5*dt));projectile.rotation.z+=.45}else{projectile.dispose();projectile=null}
+ if(!projectile)return;projectileLife-=dt;if(projectileLife<=0){clearProjectile();return}
+ const prev=projectile.position.clone(),to=projectileTarget.subtract(projectile.position);to.y*=.35;const dist=to.length();
+ if(demon&&demon.isEnabled()&&!demonStunned&&BABYLON.Vector3.Distance(projectile.position,demon.position)<.72){clearProjectile();hitDemon(hunterInfo.zoey.damage,'zoey');flash(demonShield>0?'ZOEY : impact sur le bouclier !':'ZOEY : touché !',520);return}
+ if(dist>.08){to.normalize();projectile.position.addInPlace(to.scale(14.2*dt));projectile.rotation.z+=.65;let lead=prev;projectileGhosts.forEach((g,i)=>{const old=g.position.clone();g.position.copyFrom(BABYLON.Vector3.Lerp(g.position,lead,.58-i*.07));lead=old})}else clearProjectile()
 }
 function animateWeapon(){
  if(attackTime<=0)return;attackTime=Math.max(0,attackTime-Math.min(engine.getDeltaTime()/1000,.033));const phase=1-attackTime/attackDuration;const w=player.metadata.weapon;
@@ -234,6 +250,8 @@ let lastGoodPlayerPos=null,lastUpdateError='';
 function update(){
  try{
   const dt=Math.min(engine.getDeltaTime()/1000,.033);
+  if(rumiComboTimer>0){rumiComboTimer=Math.max(0,rumiComboTimer-dt);if(rumiComboTimer===0)rumiCombo=0}
+  if(activeRing)activeRing.rotation.z+=dt*.8;
   if(!lastGoodPlayerPos)lastGoodPlayerPos=player.position.clone();
   const axes=getMoveAxes();
   const ix=Number.isFinite(input.x)?input.x:0, iy=Number.isFinite(input.y)?input.y:0;
