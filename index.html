@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
 <meta name="theme-color" content="#15102b" />
 <meta name="mobile-web-app-capable" content="yes" />
-<title>Honmoon Adventures — Prototype 0.6</title>
+<title>Honmoon Adventures — v0.7 • Chapitre 1</title>
 <style>
 :root{--bg:#15102b;--glass:rgba(20,12,44,.79);--line:rgba(255,255,255,.2);--text:#fff;--pink:#ff4ed7;--cyan:#65e9ff;--gold:#ffd76b;--violet:#9d5cff}
 *{box-sizing:border-box} html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;touch-action:none}#gameCanvas{width:100%;height:100%;display:block;outline:none}
@@ -36,6 +36,13 @@
 .objective{border-color:rgba(255,215,107,.27)}
 .message{box-shadow:0 0 24px rgba(113,74,255,.16)}
 
+
+/* v0.7 story/chapter layer */
+.chapter-kicker{font-size:12px;letter-spacing:.18em;font-weight:950;color:var(--gold);text-transform:uppercase}
+.story-panel{max-width:680px;text-align:left}.story-panel h1{margin:7px 0 6px;font-size:clamp(28px,5vw,46px);line-height:1.05}.story-panel p{margin:8px 0 0;line-height:1.45}.story-speaker{margin-top:18px;font-size:12px;font-weight:950;color:var(--cyan);letter-spacing:.08em}.story-line{font-size:clamp(17px,2.5vw,22px);min-height:58px}.story-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}.story-btn{border:1px solid rgba(255,255,255,.28);background:linear-gradient(135deg,#7048ff,#d747d4);color:#fff;border-radius:999px;padding:12px 22px;font-weight:950;font-size:15px;min-width:150px}
+.chapter-rewards{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:18px 0}.reward-card{min-width:120px;padding:12px 16px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.17);font-weight:900}.chapter-note{font-size:13px;opacity:.8}
+.collectible-hud{position:absolute;left:50%;top:64px;transform:translateX(-50%);padding:7px 12px;border-radius:999px;background:rgba(24,14,52,.9);border:1px solid rgba(255,215,107,.4);font-size:11px;font-weight:900;color:var(--gold)}
+
 @media(max-width:900px){.party-card{padding:5px 6px}.party-card .char-meta{display:none}.portrait{width:34px;height:34px}.objective{max-width:38vw;font-size:11px}.joystick{width:112px;height:112px}.stick{width:52px;height:52px;left:28px;top:28px}.actions{transform:scale(.9);transform-origin:bottom right}.enemy-hud{top:64px}.combat-pill{right:12px;bottom:118px;font-size:9px}}
 </style>
 </head>
@@ -48,11 +55,11 @@
       <div id="card-mira" class="party-card" data-char="mira"><div class="portrait m">M</div><div class="char-meta"><div class="char-name">MIRA</div><div class="mini-state">brise-bouclier</div></div></div>
       <div id="card-zoey" class="party-card" data-char="zoey"><div class="portrait z">Z</div><div class="char-meta"><div class="char-name">ZOEY</div><div class="mini-state">distance</div></div></div>
     </div>
-    <div id="objective" class="objective">MISSION : Suis Derpy.</div>
+    <div id="objective" class="objective">CHAPITRE 1 : La chasse commence</div>
     <button id="parentBtn" class="icon-btn">⚙</button>
   </div>
   <div id="message" class="message hidden"></div>
-  <div id="guidePill" class="guide-pill">🐯 Derpy semble vouloir te montrer quelque chose…</div>
+  <div id="guidePill" class="guide-pill hidden">🐯 Derpy t’attend plus loin…</div>
   <div id="combatPill" class="combat-pill"><b>RUMI</b>Saingeom • équilibrée</div>
   <div id="enemyHud" class="enemy-hud hidden"><div id="enemyTitle" class="enemy-title">BRUTE DES OMBRES</div><div class="bar"><div id="enemyFill" class="bar-fill"></div></div><div id="shieldRow" class="shield-row"><span>BOUCLIER</span><div class="shield-bar"><div id="shieldFill" class="shield-fill"></div></div></div></div>
   <div id="comboChip" class="combo-chip hidden">COMBO x1</div>
@@ -64,15 +71,19 @@
   </div>
   <button id="sealBtn" class="hidden">✨ SCELLER</button>
   <div id="sealPanel" class="overlay hidden"><div class="panel"><div class="seal-title">SCEAU DE L’HONMOON</div><div class="seal-subtitle">Complète le sceau</div><div id="question" class="question">8 + 7 = ?</div><div id="answers" class="answers"></div><div id="sealHint" class="seal-hint"></div></div></div>
-  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Prototype v0.6 — silhouettes HUNTR/X améliorées, démon plus expressif, effets Honmoon et rue de Séoul enrichie.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
+  <div id="collectibleHud" class="collectible-hud hidden">✨ ÉCLAT D’HONMOON TROUVÉ</div>
+  <div id="storyPanel" class="overlay"><div class="panel story-panel"><div class="chapter-kicker">CHAPITRE 1</div><h1>La chasse commence</h1><div id="storySpeaker" class="story-speaker">CELINE</div><div id="storyLine" class="story-line">HUNTR/X, une perturbation a été repérée dans les rues. Restez ensemble et observez bien.</div><div class="story-actions"><button id="storyNext" class="story-btn">CONTINUER</button></div></div></div>
+  <div id="chapterPanel" class="overlay hidden"><div class="panel"><div class="chapter-kicker">CHAPITRE TERMINÉ</div><h1>La chasse commence</h1><p>La présence démoniaque a été scellée. Séoul est en sécurité… pour l’instant.</p><div class="chapter-rewards"><div class="reward-card">⭐ +100<br><small>ÉTOILES</small></div><div class="reward-card">💎 +2<br><small>CRISTAUX</small></div><div class="reward-card">✨ 1<br><small>ÉCLAT</small></div></div><div class="chapter-note">Tu peux maintenant explorer librement.</div><button id="chapterContinue" class="story-btn" style="margin-top:18px">CONTINUER</button></div></div>
+  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Version v0.7 — Chapitre 1, objectifs narratifs, dialogue, collecte, combat et conclusion de chapitre.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
 </div>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script>
+/* Honmoon Adventures v0.7 — Chapter 1 story layer on stable v0.6.1 */
 (()=>{
 const canvas=document.getElementById('gameCanvas');
 const engine=new BABYLON.Engine(canvas,true,{preserveDrawingBuffer:false,stencil:false,adaptToDeviceRatio:true});
 engine.setHardwareScalingLevel(Math.max(1,window.devicePixelRatio>1.5?1.4:1));
-let scene,camera,player,demon,derpy,slashFx,activeRing,impactRing;
+let scene,camera,player,demon,derpy,collectible,collectibleRing,slashFx,activeRing,impactRing;
 let rumi,mira,zoey;
 const hunters={};
 const input={x:0,y:0};
@@ -88,6 +99,14 @@ let verticalVelocity=0,onGround=true,dodgeTime=0,dodgeDir=new BABYLON.Vector3(),
 let derpyPhase=1,derpyWait=0,derpyComplete=false,derpyStarted=false,derpyPaused=false;
 let projectile=null,projectileTarget=null,projectileLife=0,projectileGhosts=[];
 let rumiCombo=0,rumiComboTimer=0;
+let chapterStarted=false,chapterComplete=false,storyPaused=true,collectibleFound=false;
+const storyLines=[
+ {speaker:'CELINE',line:'HUNTR/X, une perturbation a été repérée dans les rues. Restez ensemble et observez bien.'},
+ {speaker:'MIRA',line:'Enfin un peu d’action. Si un démon se cache ici, on va le trouver.'},
+ {speaker:'ZOEY',line:'Attendez… Derpy est déjà parti devant. Il a sûrement senti quelque chose !'},
+ {speaker:'RUMI',line:'On reste ensemble. Suivons-le et protégeons la ville.'}
+];
+let storyStep=0;
 const derpyPoints=[new BABYLON.Vector3(-1,.58,-12),new BABYLON.Vector3(2.8,.58,-5),new BABYLON.Vector3(-2.4,.58,4),new BABYLON.Vector3(0,.58,11.5)];
 function mat(name,color,em=.25){const m=new BABYLON.StandardMaterial(name,scene);m.diffuseColor=color.scale(.55);m.emissiveColor=color.scale(em);m.specularColor=BABYLON.Color3.Black();return m}
 function neon(name,color){return mat(name,color,.85)}
@@ -175,6 +194,24 @@ function createDerpy(){
  const eyeM=neon('derpyEye',new BABYLON.Color3(1,.8,.12));[-.14,.14].forEach((x,i)=>{const e=BABYLON.MeshBuilder.CreateSphere('de'+i,{diameter:.12,segments:6},scene);e.parent=head;e.position.set(x,.05,-.31);e.material=eyeM;});
  const tail=BABYLON.MeshBuilder.CreateTorus('tail',{diameter:.6,thickness:.1,tessellation:14,arc:.65},scene);tail.parent=derpy;tail.position.set(.44,.05,.25);tail.rotation.y=Math.PI/2;tail.material=derpy.material;
 }
+function createCollectible(){
+ collectible=BABYLON.MeshBuilder.CreateSphere('honmoonShard',{diameter:.62,segments:6},scene);
+ collectible.position.set(2.8,.85,-5.0);collectible.scaling.y=1.35;collectible.rotation.z=.55;
+ collectible.material=neon('honmoonShardMat',new BABYLON.Color3(1,.72,.16));
+ collectibleRing=BABYLON.MeshBuilder.CreateTorus('honmoonShardRing',{diameter:1.15,thickness:.035,tessellation:20},scene);
+ collectibleRing.position.set(2.8,.13,-5.0);collectibleRing.rotation.x=Math.PI/2;collectibleRing.material=neon('honmoonShardRingMat',new BABYLON.Color3(1,.72,.16));
+}
+function updateCollectible(dt){
+ if(!collectible||collectibleFound)return;
+ collectible.rotation.y+=dt*1.8;collectible.position.y=.85+Math.sin(performance.now()*.003)*.08;
+ if(collectibleRing)collectibleRing.rotation.z+=dt*.8;
+ if(chapterStarted&&BABYLON.Vector3.Distance(player.position,collectible.position)<1.65){
+   collectibleFound=true;collectible.setEnabled(false);if(collectibleRing)collectibleRing.setEnabled(false);
+   localStorage.setItem('honmoon-shards',String((+localStorage.getItem('honmoon-shards')||0)+1));
+   const chip=document.getElementById('collectibleHud');chip.classList.remove('hidden');setTimeout(()=>chip.classList.add('hidden'),1800);
+   flash('Mira : « Un éclat d’Honmoon ! Bien vu. »',1500);
+ }
+}
 function createDemon(){
  demon=BABYLON.MeshBuilder.CreateSphere('demon',{diameter:1.62,segments:12},scene);demon.position.set(0,.78,16);demon.scaling.copyFromFloats(.92,1.14,.92);demon.material=neon('demonMat',new BABYLON.Color3(.72,.025,.19));demon.setEnabled(false);
  const bodyM=demon.material, darkM=mat('demonDark',new BABYLON.Color3(.08,.015,.15),.18), markM=neon('demonMarks',new BABYLON.Color3(.72,.16,1));
@@ -196,7 +233,7 @@ function createScene(){
  mira=createHunter('mira',hunterInfo.mira.color,new BABYLON.Vector3(-1.1,BASE_Y,-20.3));
  zoey=createHunter('zoey',hunterInfo.zoey.color,new BABYLON.Vector3(1.1,BASE_Y,-20.3));
  hunters.rumi=rumi;hunters.mira=mira;hunters.zoey=zoey;player=rumi;
- createDerpy();createDemon();
+ createDerpy();createCollectible();createDemon();
  slashFx=BABYLON.MeshBuilder.CreateTorus('slashFx',{diameter:2.35,thickness:.06,tessellation:24,arc:.56},scene);slashFx.parent=player;slashFx.position.set(0,.25,-.65);slashFx.rotation.x=Math.PI/2;slashFx.material=neon('slashMat',hunterInfo.rumi.attackColor);slashFx.visibility=.88;slashFx.setEnabled(false);
  activeRing=BABYLON.MeshBuilder.CreateTorus('activeRing',{diameter:1.45,thickness:.045,tessellation:24},scene);activeRing.parent=player;activeRing.position.set(0,-1.01,0);activeRing.rotation.x=Math.PI/2;activeRing.material=neon('activeRingMat',hunterInfo.rumi.attackColor);
  impactRing=BABYLON.MeshBuilder.CreateTorus('impactRing',{diameter:1.2,thickness:.07,tessellation:20},scene);impactRing.rotation.x=Math.PI/2;impactRing.material=neon('impactRingMat',hunterInfo.mira.attackColor);impactRing.setEnabled(false);
@@ -204,6 +241,9 @@ function createScene(){
  updateCharacterUI();
  return scene;
 }
+function renderStoryLine(){const s=storyLines[storyStep];document.getElementById('storySpeaker').textContent=s.speaker;document.getElementById('storyLine').textContent=s.line;document.getElementById('storyNext').textContent=storyStep===storyLines.length-1?'COMMENCER':'CONTINUER'}
+function advanceStory(){if(storyStep<storyLines.length-1){storyStep++;renderStoryLine();return}document.getElementById('storyPanel').classList.add('hidden');chapterStarted=true;storyPaused=false;document.getElementById('objective').textContent='MISSION : Rejoins Derpy au carrefour.';const gp=document.getElementById('guidePill');gp.classList.remove('hidden');gp.textContent='🐯 Derpy t’attend plus loin…';flash('CHAPITRE 1 — LA CHASSE COMMENCE',1400)}
+function completeChapter(){if(chapterComplete)return;chapterComplete=true;storyPaused=true;localStorage.setItem('honmoon-chapter1','complete');localStorage.setItem('honmoon-crystals',String((+localStorage.getItem('honmoon-crystals')||0)+2));setTimeout(()=>document.getElementById('chapterPanel').classList.remove('hidden'),900)}
 function flash(text,ms=1100){const el=document.getElementById('message');el.textContent=text;el.classList.remove('hidden');clearTimeout(flash.t);flash.t=setTimeout(()=>el.classList.add('hidden'),ms)}
 function updateCharacterUI(){
  document.querySelectorAll('.party-card').forEach(c=>{const on=c.dataset.char===activeKey;c.classList.toggle('active',on);c.setAttribute('aria-pressed',on?'true':'false')});
@@ -214,7 +254,7 @@ function updateCharacterUI(){
  if(activeKey==='zoey'){btn.innerHTML='➤<span>Shin-kal</span>';btn.style.background='linear-gradient(145deg,#149ecb,#2bd8c5)'}
 }
 function switchHunter(key){
- if(!hunters[key]||key===activeKey||sealOpened||attackTime>0||dodgeTime>0)return;
+ if(storyPaused||!hunters[key]||key===activeKey||sealOpened||attackTime>0||dodgeTime>0)return;
  const old=player,chosen=hunters[key];
  if(!onGround){chosen.position.y=BASE_Y;verticalVelocity=0;onGround=true}
  const d=BABYLON.Vector3.Distance(old.position,chosen.position);
@@ -227,7 +267,7 @@ function switchHunter(key){
  updateCharacterUI();flash(`${hunterInfo[key].name} prend la tête !`,850);
 }
 function updateEnemyHud(){const hud=document.getElementById('enemyHud'),fill=document.getElementById('enemyFill'),shield=document.getElementById('shieldFill'),row=document.getElementById('shieldRow'),title=document.getElementById('enemyTitle');if(!encounterStarted||!demon.isEnabled()){hud.classList.add('hidden');return}hud.classList.remove('hidden');fill.style.width=`${Math.max(0,demonHP)/DEMON_MAX_HP*100}%`;shield.style.width=`${Math.max(0,demonShield)/DEMON_MAX_SHIELD*100}%`;row.classList.toggle('hidden',demonShield<=0);title.textContent=demonShield>0?'BRUTE DES OMBRES • PROTÉGÉE':'BRUTE DES OMBRES • VULNÉRABLE'}
-function openSeal(){if(sealOpened)return;sealOpened=true;document.getElementById('sealBtn').classList.add('hidden');const panel=document.getElementById('sealPanel'),answers=document.getElementById('answers'),q=document.getElementById('question'),sub=document.querySelector('.seal-subtitle'),hint=document.getElementById('sealHint');answers.innerHTML='';hint.textContent='';const cs=[{type:'math',sub:'Complète le sceau',q:'8 + 7 = ?',opts:['13','14','15','16'],a:'15'},{type:'fr',sub:'Complète le sort',q:'Quel mot contient le son « ou » ?',opts:['CHAT','LOUP','PAIN','LIT'],a:'LOUP'}];const c=cs[Math.floor(Math.random()*cs.length)];sub.textContent=c.sub;q.textContent=c.q;q.style.fontSize=c.type==='fr'?'clamp(26px,5vw,44px)':'';c.opts.forEach(v=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>{if(v===c.a){hint.textContent='✨ SCEAU PARFAIT !';setTimeout(()=>{panel.classList.add('hidden');demon.setEnabled(false);updateEnemyHud();flash('DÉMON SCELLÉ !  ⭐ +100   💎 +2',2200);document.getElementById('objective').textContent='MISSION : Explore librement.';localStorage.setItem('honmoon-stars',String((+localStorage.getItem('honmoon-stars')||0)+100))},750)}else{b.disabled=true;b.style.opacity=.28;hint.textContent='Presque ! Essaie encore.'}};answers.appendChild(b)});panel.classList.remove('hidden')}
+function openSeal(){if(sealOpened)return;sealOpened=true;document.getElementById('sealBtn').classList.add('hidden');const panel=document.getElementById('sealPanel'),answers=document.getElementById('answers'),q=document.getElementById('question'),sub=document.querySelector('.seal-subtitle'),hint=document.getElementById('sealHint');answers.innerHTML='';hint.textContent='';const cs=[{type:'math',sub:'Complète le sceau',q:'8 + 7 = ?',opts:['13','14','15','16'],a:'15'},{type:'fr',sub:'Complète le sort',q:'Quel mot contient le son « ou » ?',opts:['CHAT','LOUP','PAIN','LIT'],a:'LOUP'}];const c=cs[Math.floor(Math.random()*cs.length)];sub.textContent=c.sub;q.textContent=c.q;q.style.fontSize=c.type==='fr'?'clamp(26px,5vw,44px)':'';c.opts.forEach(v=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>{if(v===c.a){hint.textContent='✨ SCEAU PARFAIT !';setTimeout(()=>{panel.classList.add('hidden');demon.setEnabled(false);updateEnemyHud();flash('DÉMON SCELLÉ !',1200);document.getElementById('objective').textContent='MISSION ACCOMPLIE !';localStorage.setItem('honmoon-stars',String((+localStorage.getItem('honmoon-stars')||0)+100));completeChapter()},750)}else{b.disabled=true;b.style.opacity=.28;hint.textContent='Presque ! Essaie encore.'}};answers.appendChild(b)});panel.classList.remove('hidden')}
 function showSealButton(){demonStunned=true;document.getElementById('sealBtn').classList.remove('hidden');document.getElementById('objective').textContent='Le démon est affaibli — SCELLE-LE !';flash('HUNTR/X : « Maintenant ! Scelle-le ! »',1500)}
 function damagePlayer(){if(playerInvulnerable>0||dodgeTime>0||playerHP<=0)return;playerHP--;playerInvulnerable=1.15;flash(playerHP>0?'AÏE ! Esquive l’attaque !':'Celine te protège !',900);player.scaling.copyFromFloats(1.16,.86,1.16);setTimeout(()=>player.scaling.copyFromFloats(1,1,1),150);if(playerHP<=0){playerHP=3;setTimeout(()=>{player.position.set(0,BASE_Y,8);flash('Celine : « Reste concentrée ! »',1400)},550)}}
 function showImpactFx(){
@@ -260,7 +300,7 @@ function launchZoeyBlade(){
 }
 function showCombo(step){const chip=document.getElementById('comboChip');if(step<=1){chip.classList.add('hidden');return}chip.textContent=step===3?'✨ COMBO x3 — FINISH !':`COMBO x${step}`;chip.classList.remove('hidden');clearTimeout(showCombo.t);showCombo.t=setTimeout(()=>chip.classList.add('hidden'),700)}
 function attack(){
- if(attackTime>0||sealOpened)return;const info=hunterInfo[activeKey];
+ if(storyPaused||attackTime>0||sealOpened)return;const info=hunterInfo[activeKey];
  if(activeKey==='rumi'){
    rumiCombo=(rumiComboTimer>0)?(rumiCombo%3)+1:1;rumiComboTimer=.72;attackDuration=rumiCombo===3?.34:info.cooldown;attackTime=attackDuration;showCombo(rumiCombo);
    const scale=rumiCombo===3?1.45:rumiCombo===2?1.15:1;slashFx.scaling.copyFromFloats(scale,scale,1);slashFx.setEnabled(true);setTimeout(()=>slashFx.setEnabled(false),rumiCombo===3?230:165);
@@ -272,7 +312,7 @@ function attack(){
    attackDuration=info.cooldown;attackTime=attackDuration;launchZoeyBlade();
  }
 }
-function jump(){if(!onGround)return;verticalVelocity=7.2;onGround=false}
+function jump(){if(storyPaused||!onGround)return;verticalVelocity=7.2;onGround=false}
 function getMoveAxes(){
  // ArcRotateCamera angle -> stable ground-plane axes.
  // This avoids deriving movement from camera.target/camera.position while the target is following the player.
@@ -288,20 +328,20 @@ function getFacingDirection(mesh=player){
  // Hunter models are authored facing local -Z, so convert the visible model front to a logical world direction.
  return new BABYLON.Vector3(-Math.sin(y),0,-Math.cos(y)).normalize();
 }
-function dodge(){if(dodgeTime>0)return;const axes=getMoveAxes();let d=axes.f.scale(input.y).add(axes.r.scale(input.x));if(d.lengthSquared()<.05)d=axes.f.scale(-1);d.normalize();dodgeDir.copyFrom(d);dodgeTime=.22;flash('ESQUIVE !',320)}
+function dodge(){if(storyPaused||dodgeTime>0)return;const axes=getMoveAxes();let d=axes.f.scale(input.y).add(axes.r.scale(input.x));if(d.lengthSquared()<.05)d=axes.f.scale(-1);d.normalize();dodgeDir.copyFrom(d);dodgeTime=.22;flash('ESQUIVE !',320)}
 function companionFollow(mesh,offset,dt){if(mesh===player)return;const target=player.position.add(offset);target.y=BASE_Y;const to=target.subtract(mesh.position);if(to.length()>4.2)mesh.position=BABYLON.Vector3.Lerp(mesh.position,target,.13);else mesh.position.addInPlace(to.scale(Math.min(1,4*dt)));if(to.lengthSquared()>.03)mesh.rotation.y=Math.atan2(to.x,to.z)+Math.PI}
 function updateCompanions(dt){const others=Object.values(hunters).filter(h=>h!==player),f=getFacingDirection(player),r=new BABYLON.Vector3(f.z,0,-f.x),back=f.scale(-1.55);companionFollow(others[0],back.add(r.scale(-1.05)),dt);companionFollow(others[1],back.add(r.scale(1.05)),dt)}
 function updateDerpy(dt){
- if(derpyComplete||!document.getElementById('derpyToggle').checked)return;
+ if(!chapterStarted||storyPaused||derpyComplete||!document.getElementById('derpyToggle').checked)return;
  const playerDist=BABYLON.Vector3.Distance(player.position,derpy.position);
- if(!derpyStarted){if(playerDist>5.2){derpy.rotation.y+=.012;return}derpyStarted=true;derpyPaused=false;flash('Zoey : « Derpy ? Où est-ce que tu vas ? »',1100);document.getElementById('guidePill').textContent='🐯 Suis Derpy — il a repéré quelque chose !'}
+ if(!derpyStarted){if(playerDist>5.2){derpy.rotation.y+=.012;return}derpyStarted=true;derpyPaused=false;flash('Zoey : « Derpy ? Où est-ce que tu vas ? »',1100);document.getElementById('objective').textContent='MISSION : Suis Derpy.';document.getElementById('guidePill').textContent='🐯 Suis Derpy — il a repéré quelque chose !'}
  if(playerDist>8.0){if(!derpyPaused){derpyPaused=true;document.getElementById('guidePill').textContent='🐯 Derpy t’attend… rejoins-le !'}derpy.rotation.y+=.01;return}
  if(derpyPaused&&playerDist<5.8){derpyPaused=false;flash('Derpy repart en courant !',850);document.getElementById('guidePill').textContent='🐯 Suis Derpy !'}if(derpyPaused)return;
  const target=derpyPoints[derpyPhase];const to=target.subtract(derpy.position);to.y=0;const remaining=to.length();if(remaining>.28){to.normalize();derpy.position.addInPlace(to.scale(3.25*dt));derpy.rotation.y=Math.atan2(to.x,to.z);return}
  if(derpyPhase<derpyPoints.length-1){if(playerDist<4.6){derpyWait+=dt;if(derpyWait>.42){derpyPhase++;derpyWait=0;flash('Derpy repart en courant !',750)}}else{derpyWait=0;derpy.rotation.y+=.012}return}
  if(playerDist<4.2){derpyComplete=true;document.getElementById('guidePill').classList.add('hidden');startEncounter()}
 }
-function startEncounter(){if(encounterStarted)return;encounterStarted=true;demonHP=DEMON_MAX_HP;demonShield=DEMON_MAX_SHIELD;demon.setEnabled(true);demon.position.set(0,.78,15.7);document.getElementById('objective').textContent='⚠ BRUTE DES OMBRES — brise son bouclier !';flash('Sussie crie au-dessus de la ruelle… DÉMON REPÉRÉ !',1600);updateEnemyHud()}
+function startEncounter(){if(encounterStarted)return;encounterStarted=true;demonHP=DEMON_MAX_HP;demonShield=DEMON_MAX_SHIELD;demon.setEnabled(true);demon.position.set(0,.78,15.7);document.getElementById('objective').textContent='⚠ BRUTE DES OMBRES — brise son bouclier !';flash('Sussie : « Attention ! Présence démoniaque ! »',1600);updateEnemyHud()}
 function updateProjectile(dt){
  if(!projectile)return;projectileLife-=dt;if(projectileLife<=0){clearProjectile();return}
  const prev=projectile.position.clone(),to=projectileTarget.subtract(projectile.position);to.y*=.35;const dist=to.length();
@@ -325,8 +365,8 @@ function update(){
   const axes=getMoveAxes();
   const ix=Number.isFinite(input.x)?input.x:0, iy=Number.isFinite(input.y)?input.y:0;
   const move=axes.f.scale(iy).add(axes.r.scale(ix));
-  if(dodgeTime>0){player.position.addInPlace(dodgeDir.scale(11.5*dt));player.rotation.y=Math.atan2(dodgeDir.x,dodgeDir.z)+Math.PI;dodgeTime=Math.max(0,dodgeTime-dt)}
-  else if(move.lengthSquared()>.01){
+  if(!storyPaused&&dodgeTime>0){player.position.addInPlace(dodgeDir.scale(11.5*dt));player.rotation.y=Math.atan2(dodgeDir.x,dodgeDir.z)+Math.PI;dodgeTime=Math.max(0,dodgeTime-dt)}
+  else if(!storyPaused&&move.lengthSquared()>.01){
     move.normalize();
     const speed=activeKey==='zoey'?5.6:activeKey==='mira'?4.9:5.2;
     const step=move.scale(speed*dt);
@@ -337,7 +377,7 @@ function update(){
   if(!Number.isFinite(player.position.x)||!Number.isFinite(player.position.y)||!Number.isFinite(player.position.z)){player.position.copyFrom(lastGoodPlayerPos);verticalVelocity=0;onGround=true;input.x=input.y=0}
   player.position.x=BABYLON.Scalar.Clamp(player.position.x,-5.5,5.5);player.position.z=BABYLON.Scalar.Clamp(player.position.z,-27,25);
   lastGoodPlayerPos.copyFrom(player.position);
-  animateWeapon();updateProjectile(dt);
+  animateWeapon();updateProjectile(dt);updateCollectible(dt);
   const safeTarget=player.position.add(new BABYLON.Vector3(0,1,0));
   camera.target.copyFrom(BABYLON.Vector3.Lerp(camera.target,safeTarget,.12));
   updateCompanions(dt);updateDerpy(dt);
@@ -349,7 +389,8 @@ function update(){
   input.x=input.y=0;
  }
 }
-createScene();scene.onBeforeRenderObservable.add(update);engine.runRenderLoop(()=>scene.render());window.addEventListener('resize',()=>engine.resize());
+createScene();renderStoryLine();scene.onBeforeRenderObservable.add(update);engine.runRenderLoop(()=>scene.render());window.addEventListener('resize',()=>engine.resize());
+document.getElementById('storyNext').addEventListener('pointerdown',advanceStory);document.getElementById('chapterContinue').addEventListener('pointerdown',()=>{document.getElementById('chapterPanel').classList.add('hidden');storyPaused=false;document.getElementById('objective').textContent='CHAPITRE TERMINÉ — Explore librement.';flash('Rumi : « Beau travail. On continue la patrouille. »',1500)});
 document.getElementById('attackBtn').addEventListener('pointerdown',attack);document.getElementById('jumpBtn').addEventListener('pointerdown',jump);document.getElementById('dodgeBtn').addEventListener('pointerdown',dodge);document.getElementById('sealBtn').addEventListener('pointerdown',openSeal);
 // Robust party switching for Android/Samsung browsers.  Use several event paths
 // because some tablet browsers hand pointerdown to the 3D canvas/camera first.
