@@ -55,7 +55,7 @@
       <div id="card-mira" class="party-card" data-char="mira"><div class="portrait m">M</div><div class="char-meta"><div class="char-name">MIRA</div><div class="mini-state">brise-bouclier</div></div></div>
       <div id="card-zoey" class="party-card" data-char="zoey"><div class="portrait z">Z</div><div class="char-meta"><div class="char-name">ZOEY</div><div class="mini-state">distance</div></div></div>
     </div>
-    <div id="objective" class="objective">CHAPITRE 1 : La chasse commence</div>
+    <div id="objective" class="objective">CHAPITRE 2 : Les ombres de Séoul</div>
     <button id="parentBtn" class="icon-btn">⚙</button>
   </div>
   <div id="message" class="message hidden"></div>
@@ -73,18 +73,18 @@
   <button id="sealBtn" class="hidden">✨ SCELLER</button>
   <div id="sealPanel" class="overlay hidden"><div class="panel"><div class="seal-title">SCEAU DE L’HONMOON</div><div class="seal-subtitle">Complète le sceau</div><div id="question" class="question">8 + 7 = ?</div><div id="answers" class="answers"></div><div id="sealHint" class="seal-hint"></div></div></div>
   <div id="collectibleHud" class="collectible-hud hidden">✨ ÉCLAT D’HONMOON TROUVÉ</div>
-  <div id="storyPanel" class="overlay"><div class="panel story-panel"><div class="chapter-kicker">CHAPITRE 1</div><h1>La chasse commence</h1><div id="storySpeaker" class="story-speaker">CELINE</div><div id="storyLine" class="story-line">HUNTR/X, une perturbation a été repérée dans les rues. Restez ensemble et observez bien.</div><div class="story-actions"><button id="storyNext" class="story-btn">CONTINUER</button></div></div></div>
-  <div id="chapterPanel" class="overlay hidden"><div class="panel"><div class="chapter-kicker">CHAPITRE TERMINÉ</div><h1>La chasse commence</h1><p>La présence démoniaque a été scellée. Séoul est en sécurité… pour l’instant.</p><div class="chapter-rewards"><div class="reward-card">⭐ +100<br><small>ÉTOILES</small></div><div class="reward-card">💎 +2<br><small>CRISTAUX</small></div><div class="reward-card">✨ 1<br><small>ÉCLAT</small></div></div><div class="chapter-note">Tu peux maintenant explorer librement.</div><button id="chapterContinue" class="story-btn" style="margin-top:18px">CONTINUER</button></div></div>
-  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Version v0.7.1 — Chapitre 1, avec affichage des cœurs et protection de Celine corrigés.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
+  <div id="storyPanel" class="overlay"><div class="panel story-panel"><div class="chapter-kicker">CHAPITRE 2</div><h1>Les ombres de Séoul</h1><div id="storySpeaker" class="story-speaker">CELINE</div><div id="storyLine" class="story-line">HUNTR/X, plusieurs traces démoniaques viennent d’apparaître dans le quartier. Sussie vous guidera jusqu’à la source.</div><div class="story-actions"><button id="storyNext" class="story-btn">CONTINUER</button></div></div></div>
+  <div id="chapterPanel" class="overlay hidden"><div class="panel"><div class="chapter-kicker">CHAPITRE TERMINÉ</div><h1>Les ombres de Séoul</h1><p>Le gardien de la faille est scellé. Mais plusieurs traces démoniaques restent encore dans la ville…</p><div class="chapter-rewards"><div class="reward-card">⭐ +120<br><small>ÉTOILES</small></div><div class="reward-card">💎 +3<br><small>CRISTAUX</small></div><div class="reward-card">🐦 SUSSIE<br><small>ÉCLAIREUSE</small></div></div><div class="chapter-note">La patrouille continue.</div><button id="chapterContinue" class="story-btn" style="margin-top:18px">CONTINUER</button></div></div>
+  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Version v0.8 — Chapitre 2, avec Sussie, plusieurs rencontres et un seul sceau final.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
 </div>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script>
-/* Honmoon Adventures v0.7.1 — Chapter 1 bugfix layer on stable v0.6.1 */
+/* Honmoon Adventures v0.8 — Chapter 2 story layer on stable v0.7.1 */
 (()=>{
 const canvas=document.getElementById('gameCanvas');
 const engine=new BABYLON.Engine(canvas,true,{preserveDrawingBuffer:false,stencil:false,adaptToDeviceRatio:true});
 engine.setHardwareScalingLevel(Math.max(1,window.devicePixelRatio>1.5?1.4:1));
-let scene,camera,player,demon,derpy,collectible,collectibleRing,slashFx,activeRing,impactRing;
+let scene,camera,player,demon,derpy,sussie,collectible,collectibleRing,slashFx,activeRing,impactRing;
 let rumi,mira,zoey;
 const hunters={};
 const input={x:0,y:0};
@@ -100,15 +100,19 @@ let verticalVelocity=0,onGround=true,dodgeTime=0,dodgeDir=new BABYLON.Vector3(),
 let derpyPhase=1,derpyWait=0,derpyComplete=false,derpyStarted=false,derpyPaused=false;
 let projectile=null,projectileTarget=null,projectileLife=0,projectileGhosts=[];
 let rumiCombo=0,rumiComboTimer=0;
-let chapterStarted=false,chapterComplete=false,storyPaused=true,collectibleFound=false;
+let chapterStarted=false,chapterComplete=false,storyPaused=true,collectibleFound=true;
+let chapterPhase='intro',encounterPhase='none',scoutDefeated=false,guardianStarted=false;
+let sussieIndex=0,sussieWait=0,sussiePaused=false;
+const SCOUT_MAX_HP=4;
 const storyLines=[
- {speaker:'CELINE',line:'HUNTR/X, une perturbation a été repérée dans les rues. Restez ensemble et observez bien.'},
- {speaker:'MIRA',line:'Enfin un peu d’action. Si un démon se cache ici, on va le trouver.'},
- {speaker:'ZOEY',line:'Attendez… Derpy est déjà parti devant. Il a sûrement senti quelque chose !'},
- {speaker:'RUMI',line:'On reste ensemble. Suivons-le et protégeons la ville.'}
+ {speaker:'CELINE',line:'HUNTR/X, plusieurs traces démoniaques viennent d’apparaître dans le quartier. Sussie vous guidera jusqu’à la source.'},
+ {speaker:'ZOEY',line:'Je la vois ! Elle tourne au-dessus de la rue. Quelque chose bouge plus loin.'},
+ {speaker:'MIRA',line:'Alors on avance. Si ce sont des démons, ils ne passeront pas.'},
+ {speaker:'RUMI',line:'Restez proches. On suit Sussie et on nettoie la zone.'}
 ];
 let storyStep=0;
 const derpyPoints=[new BABYLON.Vector3(-1,.58,-12),new BABYLON.Vector3(2.8,.58,-5),new BABYLON.Vector3(-2.4,.58,4),new BABYLON.Vector3(0,.58,11.5)];
+const sussiePoints=[new BABYLON.Vector3(-2.6,3.2,-14),new BABYLON.Vector3(3.2,3.2,-7),new BABYLON.Vector3(-2.6,3.2,1),new BABYLON.Vector3(3.0,3.2,8),new BABYLON.Vector3(0,3.2,13.6)];
 function mat(name,color,em=.25){const m=new BABYLON.StandardMaterial(name,scene);m.diffuseColor=color.scale(.55);m.emissiveColor=color.scale(em);m.specularColor=BABYLON.Color3.Black();return m}
 function neon(name,color){return mat(name,color,.85)}
 function box(name,w,h,d,x,y,z,color){const b=BABYLON.MeshBuilder.CreateBox(name,{width:w,height:h,depth:d},scene);b.position.set(x,y,z);b.material=mat(name+'Mat',color,.1);return b}
@@ -195,6 +199,30 @@ function createDerpy(){
  const eyeM=neon('derpyEye',new BABYLON.Color3(1,.8,.12));[-.14,.14].forEach((x,i)=>{const e=BABYLON.MeshBuilder.CreateSphere('de'+i,{diameter:.12,segments:6},scene);e.parent=head;e.position.set(x,.05,-.31);e.material=eyeM;});
  const tail=BABYLON.MeshBuilder.CreateTorus('tail',{diameter:.6,thickness:.1,tessellation:14,arc:.65},scene);tail.parent=derpy;tail.position.set(.44,.05,.25);tail.rotation.y=Math.PI/2;tail.material=derpy.material;
 }
+function createSussie(){
+ sussie=BABYLON.MeshBuilder.CreateSphere('sussie',{diameter:.58,segments:8},scene);sussie.scaling.copyFromFloats(1.35,.72,.92);sussie.position.copyFrom(sussiePoints[0]);sussie.material=mat('sussieBody',new BABYLON.Color3(.075,.09,.16),.18);
+ const head=BABYLON.MeshBuilder.CreateSphere('sussieHead',{diameter:.38,segments:8},scene);head.parent=sussie;head.position.set(0,.13,-.34);head.material=sussie.material;
+ const beak=BABYLON.MeshBuilder.CreateCylinder('sussieBeak',{height:.32,diameterTop:0,diameterBottom:.13,tessellation:5},scene);beak.parent=head;beak.position.set(0,-.02,-.28);beak.rotation.x=Math.PI/2;beak.material=neon('sussieBeakM',new BABYLON.Color3(.28,.82,1));
+ const wingM=neon('sussieWingM',new BABYLON.Color3(.18,.62,1));
+ [-1,1].forEach((side,i)=>{const w=BABYLON.MeshBuilder.CreateBox('sussieWing'+i,{width:.66,height:.05,depth:.28},scene);w.parent=sussie;w.position.set(side*.42,.02,.02);w.rotation.z=side*.28;w.material=wingM;});
+ const tail=BABYLON.MeshBuilder.CreateBox('sussieTail',{width:.22,height:.05,depth:.62},scene);tail.parent=sussie;tail.position.set(0,-.03,.48);tail.material=wingM;
+ sussie.setEnabled(false);
+}
+function horizontalDistance(a,b){const dx=a.x-b.x,dz=a.z-b.z;return Math.hypot(dx,dz)}
+function updateSussie(dt){
+ if(!sussie||!sussie.isEnabled()||!chapterStarted||storyPaused||chapterComplete)return;
+ sussie.position.y=3.18+Math.sin(performance.now()*.006)*.12;
+ const playerDist=horizontalDistance(player.position,sussie.position);
+ if(chapterPhase!=='followScout'&&chapterPhase!=='followNest'){sussie.rotation.y+=dt*.9;return}
+ if(playerDist>10){if(!sussiePaused){sussiePaused=true;document.getElementById('guidePill').textContent='🐦 Sussie t’attend… rejoins-la !'}sussie.rotation.y+=dt*1.2;return}
+ if(sussiePaused&&playerDist<7){sussiePaused=false;flash('Sussie repart en éclaireuse !',750);document.getElementById('guidePill').textContent=chapterPhase==='followScout'?'🐦 Suis Sussie — elle suit une trace !':'🐦 Suis Sussie jusqu’à la source !'}
+ if(sussiePaused)return;
+ const target=sussiePoints[sussieIndex];const to=target.subtract(sussie.position);to.y=0;const remaining=to.length();
+ if(remaining>.22){to.normalize();sussie.position.addInPlace(to.scale(4.0*dt));sussie.rotation.y=Math.atan2(to.x,to.z)+Math.PI;return}
+ if(chapterPhase==='followScout'&&sussieIndex>=2){if(playerDist<4.8){sussieWait+=dt;if(sussieWait>.45){sussieWait=0;startScoutEncounter()}}return}
+ if(chapterPhase==='followNest'&&sussieIndex>=4){if(playerDist<4.8){sussieWait+=dt;if(sussieWait>.45){sussieWait=0;startEncounter()}}return}
+ if(playerDist<6.2){sussieWait+=dt;if(sussieWait>.25){sussieIndex++;sussieWait=0}}else sussieWait=0;
+}
 function createCollectible(){
  collectible=BABYLON.MeshBuilder.CreateSphere('honmoonShard',{diameter:.62,segments:6},scene);
  collectible.position.set(2.8,.85,-5.0);collectible.scaling.y=1.35;collectible.rotation.z=.55;
@@ -234,7 +262,7 @@ function createScene(){
  mira=createHunter('mira',hunterInfo.mira.color,new BABYLON.Vector3(-1.1,BASE_Y,-20.3));
  zoey=createHunter('zoey',hunterInfo.zoey.color,new BABYLON.Vector3(1.1,BASE_Y,-20.3));
  hunters.rumi=rumi;hunters.mira=mira;hunters.zoey=zoey;player=rumi;
- createDerpy();createCollectible();createDemon();
+ createDerpy();derpy.setEnabled(false);derpyComplete=true;createSussie();createDemon();
  slashFx=BABYLON.MeshBuilder.CreateTorus('slashFx',{diameter:2.35,thickness:.06,tessellation:24,arc:.56},scene);slashFx.parent=player;slashFx.position.set(0,.25,-.65);slashFx.rotation.x=Math.PI/2;slashFx.material=neon('slashMat',hunterInfo.rumi.attackColor);slashFx.visibility=.88;slashFx.setEnabled(false);
  activeRing=BABYLON.MeshBuilder.CreateTorus('activeRing',{diameter:1.45,thickness:.045,tessellation:24},scene);activeRing.parent=player;activeRing.position.set(0,-1.01,0);activeRing.rotation.x=Math.PI/2;activeRing.material=neon('activeRingMat',hunterInfo.rumi.attackColor);
  impactRing=BABYLON.MeshBuilder.CreateTorus('impactRing',{diameter:1.2,thickness:.07,tessellation:20},scene);impactRing.rotation.x=Math.PI/2;impactRing.material=neon('impactRingMat',hunterInfo.mira.attackColor);impactRing.setEnabled(false);
@@ -243,8 +271,8 @@ function createScene(){
  return scene;
 }
 function renderStoryLine(){const s=storyLines[storyStep];document.getElementById('storySpeaker').textContent=s.speaker;document.getElementById('storyLine').textContent=s.line;document.getElementById('storyNext').textContent=storyStep===storyLines.length-1?'COMMENCER':'CONTINUER'}
-function advanceStory(){if(storyStep<storyLines.length-1){storyStep++;renderStoryLine();return}document.getElementById('storyPanel').classList.add('hidden');chapterStarted=true;storyPaused=false;document.getElementById('objective').textContent='MISSION : Rejoins Derpy au carrefour.';const gp=document.getElementById('guidePill');gp.classList.remove('hidden');gp.textContent='🐯 Derpy t’attend plus loin…';flash('CHAPITRE 1 — LA CHASSE COMMENCE',1400)}
-function completeChapter(){if(chapterComplete)return;chapterComplete=true;storyPaused=true;localStorage.setItem('honmoon-chapter1','complete');localStorage.setItem('honmoon-crystals',String((+localStorage.getItem('honmoon-crystals')||0)+2));setTimeout(()=>document.getElementById('chapterPanel').classList.remove('hidden'),900)}
+function advanceStory(){if(storyStep<storyLines.length-1){storyStep++;renderStoryLine();return}document.getElementById('storyPanel').classList.add('hidden');chapterStarted=true;storyPaused=false;chapterPhase='followScout';sussieIndex=0;sussie.setEnabled(true);document.getElementById('objective').textContent='MISSION : Suis Sussie.';const gp=document.getElementById('guidePill');gp.classList.remove('hidden');gp.textContent='🐦 Sussie suit une trace démoniaque…';flash('CHAPITRE 2 — LES OMBRES DE SÉOUL',1400)}
+function completeChapter(){if(chapterComplete)return;chapterComplete=true;storyPaused=true;chapterPhase='complete';localStorage.setItem('honmoon-chapter2','complete');localStorage.setItem('honmoon-crystals',String((+localStorage.getItem('honmoon-crystals')||0)+3));setTimeout(()=>document.getElementById('chapterPanel').classList.remove('hidden'),900)}
 function flash(text,ms=1100){const el=document.getElementById('message');el.textContent=text;el.classList.remove('hidden');clearTimeout(flash.t);flash.t=setTimeout(()=>el.classList.add('hidden'),ms)}
 function updateCharacterUI(){
  document.querySelectorAll('.party-card').forEach(c=>{const on=c.dataset.char===activeKey;c.classList.toggle('active',on);c.setAttribute('aria-pressed',on?'true':'false')});
@@ -267,8 +295,8 @@ function switchHunter(key){
  camera.target.copyFrom(player.position);camera.target.y+=1;
  updateCharacterUI();flash(`${hunterInfo[key].name} prend la tête !`,850);
 }
-function updateEnemyHud(){const hud=document.getElementById('enemyHud'),fill=document.getElementById('enemyFill'),shield=document.getElementById('shieldFill'),row=document.getElementById('shieldRow'),title=document.getElementById('enemyTitle');if(!encounterStarted||!demon.isEnabled()){hud.classList.add('hidden');return}hud.classList.remove('hidden');fill.style.width=`${Math.max(0,demonHP)/DEMON_MAX_HP*100}%`;shield.style.width=`${Math.max(0,demonShield)/DEMON_MAX_SHIELD*100}%`;row.classList.toggle('hidden',demonShield<=0);title.textContent=demonShield>0?'BRUTE DES OMBRES • PROTÉGÉE':'BRUTE DES OMBRES • VULNÉRABLE'}
-function openSeal(){if(sealOpened)return;sealOpened=true;document.getElementById('sealBtn').classList.add('hidden');const panel=document.getElementById('sealPanel'),answers=document.getElementById('answers'),q=document.getElementById('question'),sub=document.querySelector('.seal-subtitle'),hint=document.getElementById('sealHint');answers.innerHTML='';hint.textContent='';const cs=[{type:'math',sub:'Complète le sceau',q:'8 + 7 = ?',opts:['13','14','15','16'],a:'15'},{type:'fr',sub:'Complète le sort',q:'Quel mot contient le son « ou » ?',opts:['CHAT','LOUP','PAIN','LIT'],a:'LOUP'}];const c=cs[Math.floor(Math.random()*cs.length)];sub.textContent=c.sub;q.textContent=c.q;q.style.fontSize=c.type==='fr'?'clamp(26px,5vw,44px)':'';c.opts.forEach(v=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>{if(v===c.a){hint.textContent='✨ SCEAU PARFAIT !';setTimeout(()=>{panel.classList.add('hidden');demon.setEnabled(false);updateEnemyHud();flash('DÉMON SCELLÉ !',1200);document.getElementById('objective').textContent='MISSION ACCOMPLIE !';localStorage.setItem('honmoon-stars',String((+localStorage.getItem('honmoon-stars')||0)+100));completeChapter()},750)}else{b.disabled=true;b.style.opacity=.28;hint.textContent='Presque ! Essaie encore.'}};answers.appendChild(b)});panel.classList.remove('hidden')}
+function updateEnemyHud(){const hud=document.getElementById('enemyHud'),fill=document.getElementById('enemyFill'),shield=document.getElementById('shieldFill'),row=document.getElementById('shieldRow'),title=document.getElementById('enemyTitle');if(!encounterStarted||!demon.isEnabled()){hud.classList.add('hidden');return}hud.classList.remove('hidden');const maxHP=encounterPhase==='scout'?SCOUT_MAX_HP:DEMON_MAX_HP,maxShield=encounterPhase==='scout'?0:DEMON_MAX_SHIELD;fill.style.width=`${Math.max(0,demonHP)/maxHP*100}%`;shield.style.width=maxShield?`${Math.max(0,demonShield)/maxShield*100}%`:'0%';row.classList.toggle('hidden',maxShield===0||demonShield<=0);if(encounterPhase==='scout')title.textContent='DÉMON ÉCLAIREUR';else title.textContent=demonShield>0?'GARDIEN DE LA FAILLE • PROTÉGÉ':'GARDIEN DE LA FAILLE • VULNÉRABLE'}
+function openSeal(){if(sealOpened)return;sealOpened=true;document.getElementById('sealBtn').classList.add('hidden');const panel=document.getElementById('sealPanel'),answers=document.getElementById('answers'),q=document.getElementById('question'),sub=document.querySelector('.seal-subtitle'),hint=document.getElementById('sealHint');answers.innerHTML='';hint.textContent='';const cs=[{type:'math',sub:'Complète le sceau',q:'8 + 7 = ?',opts:['13','14','15','16'],a:'15'},{type:'fr',sub:'Complète le sort',q:'Quel mot contient le son « ou » ?',opts:['CHAT','LOUP','PAIN','LIT'],a:'LOUP'}];const c=cs[Math.floor(Math.random()*cs.length)];sub.textContent=c.sub;q.textContent=c.q;q.style.fontSize=c.type==='fr'?'clamp(26px,5vw,44px)':'';c.opts.forEach(v=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>{if(v===c.a){hint.textContent='✨ SCEAU PARFAIT !';setTimeout(()=>{panel.classList.add('hidden');demon.setEnabled(false);updateEnemyHud();flash('DÉMON SCELLÉ !',1200);document.getElementById('objective').textContent='MISSION ACCOMPLIE !';localStorage.setItem('honmoon-stars',String((+localStorage.getItem('honmoon-stars')||0)+120));completeChapter()},750)}else{b.disabled=true;b.style.opacity=.28;hint.textContent='Presque ! Essaie encore.'}};answers.appendChild(b)});panel.classList.remove('hidden')}
 function showSealButton(){demonStunned=true;document.getElementById('sealBtn').classList.remove('hidden');document.getElementById('objective').textContent='Le démon est affaibli — SCELLE-LE !';flash('HUNTR/X : « Maintenant ! Scelle-le ! »',1500)}
 function updateHearts(){const el=document.getElementById('playerHearts'),name=document.getElementById('healthName');if(el)el.textContent=Array.from({length:3},(_,i)=>i<playerHP?'♥':'♡').join(' ');if(name)name.textContent=hunterInfo[activeKey].name}
 function damagePlayer(){if(playerInvulnerable>0||dodgeTime>0||playerHP<=0)return;playerHP--;playerInvulnerable=1.15;updateHearts();flash(playerHP>0?'AÏE ! Esquive l’attaque !':'Celine te protège !',900);player.scaling.copyFromFloats(1.16,.86,1.16);setTimeout(()=>player.scaling.copyFromFloats(1,1,1),150);if(playerHP<=0){playerInvulnerable=2.4;demonAttackCooldown=2.4;setTimeout(()=>{playerHP=3;updateHearts();if(demon&&demon.isEnabled()){const away=player.position.subtract(demon.position);away.y=0;if(away.lengthSquared()<.01)away.set(0,0,-1);else away.normalize();player.position.addInPlace(away.scale(2.5));player.position.x=BABYLON.Scalar.Clamp(player.position.x,-5.5,5.5);player.position.z=BABYLON.Scalar.Clamp(player.position.z,-27,25)}flash('Celine : « Je te protège ! Reprends ton souffle. »',1500)},420)}}
@@ -280,7 +308,9 @@ function hitDemon(damage,sourceKey=activeKey){
  if(demonShield>0){const shieldDamage=sourceKey==='mira'?3:1;demonShield=Math.max(0,demonShield-shieldDamage);showImpactFx();demon.scaling.copyFromFloats(1.18,.82,1.18);setTimeout(()=>{if(demon&&demon.isEnabled())demon.scaling.copyFromFloats(1,1,1)},110);if(demonShield===0)flash('💥 BOUCLIER BRISÉ !',1000);else if(sourceKey==='mira')flash('MIRA FRACTURE LE BOUCLIER !',650);updateEnemyHud();return}
  demonHP-=damage;updateEnemyHud();demon.scaling.copyFromFloats(1.22,.75,1.22);demon.material.emissiveColor=new BABYLON.Color3(1,.45,.65);setTimeout(()=>{if(demon&&demon.isEnabled()){demon.scaling.copyFromFloats(1,1,1);demon.material.emissiveColor=new BABYLON.Color3(.62,.03,.21)}},130);
  if(sourceKey==='mira'){const push=demon.position.subtract(player.position);push.y=0;if(push.lengthSquared()>.01){push.normalize();demon.position.addInPlace(push.scale(.32))}showImpactFx()}
- if(demonHP<=1&&document.getElementById('learningToggle').checked)showSealButton();else if(demonHP<=0){demon.setEnabled(false);updateEnemyHud();flash('DÉMON VAINCU !',1500)}
+ if(encounterPhase==='scout'&&demonHP<=0){finishScoutEncounter();return}
+ if(encounterPhase==='guardian'&&demonHP<=1&&document.getElementById('learningToggle').checked)showSealButton();
+ else if(encounterPhase==='guardian'&&demonHP<=0){demon.setEnabled(false);updateEnemyHud();flash('GARDIEN VAINCU !',1200);document.getElementById('objective').textContent='MISSION ACCOMPLIE !';localStorage.setItem('honmoon-stars',String((+localStorage.getItem('honmoon-stars')||0)+120));completeChapter()}
 }
 function clearProjectile(){if(projectile){projectile.dispose();projectile=null}projectileGhosts.forEach(g=>{try{g.dispose()}catch(_){}});projectileGhosts=[]}
 function launchZoeyBlade(){
@@ -343,7 +373,9 @@ function updateDerpy(dt){
  if(derpyPhase<derpyPoints.length-1){if(playerDist<4.6){derpyWait+=dt;if(derpyWait>.42){derpyPhase++;derpyWait=0;flash('Derpy repart en courant !',750)}}else{derpyWait=0;derpy.rotation.y+=.012}return}
  if(playerDist<4.2){derpyComplete=true;document.getElementById('guidePill').classList.add('hidden');startEncounter()}
 }
-function startEncounter(){if(encounterStarted)return;encounterStarted=true;demonHP=DEMON_MAX_HP;demonShield=DEMON_MAX_SHIELD;demon.setEnabled(true);demon.position.set(0,.78,15.7);document.getElementById('objective').textContent='⚠ BRUTE DES OMBRES — brise son bouclier !';flash('Sussie : « Attention ! Présence démoniaque ! »',1600);updateEnemyHud()}
+function startScoutEncounter(){if(encounterStarted||scoutDefeated)return;chapterPhase='scoutFight';encounterPhase='scout';encounterStarted=true;demonStunned=false;sealOpened=false;demonHP=SCOUT_MAX_HP;demonShield=0;demonAttackCooldown=1.2;demon.setEnabled(true);demon.scaling.copyFromFloats(.64,.78,.64);demon.position.set(-2.2,.78,2.4);document.getElementById('guidePill').classList.add('hidden');document.getElementById('objective').textContent='⚠ DÉMON ÉCLAIREUR — chasse-le !';flash('Zoey : « Un éclaireur ! Pas besoin de sceau, on le repousse ! »',1700);updateEnemyHud()}
+function finishScoutEncounter(){if(scoutDefeated)return;scoutDefeated=true;demon.setEnabled(false);encounterStarted=false;encounterPhase='none';updateEnemyHud();chapterPhase='followNest';sussieIndex=3;sussiePaused=false;document.getElementById('objective').textContent='MISSION : Suis Sussie jusqu’à la source.';const gp=document.getElementById('guidePill');gp.classList.remove('hidden');gp.textContent='🐦 Sussie a repéré une présence plus forte…';flash('Rumi : « Ce n’était qu’un éclaireur. La source est plus loin. »',1700)}
+function startEncounter(){if(encounterStarted||guardianStarted)return;guardianStarted=true;chapterPhase='guardianFight';encounterPhase='guardian';encounterStarted=true;demonStunned=false;sealOpened=false;demonHP=DEMON_MAX_HP;demonShield=DEMON_MAX_SHIELD;demonAttackCooldown=1.25;demon.setEnabled(true);demon.scaling.copyFromFloats(.92,1.14,.92);demon.position.set(0,.78,15.7);document.getElementById('guidePill').classList.add('hidden');document.getElementById('objective').textContent='⚠ GARDIEN DE LA FAILLE — brise son bouclier !';flash('Sussie : « Là ! La faille est protégée ! »',1600);updateEnemyHud()}
 function updateProjectile(dt){
  if(!projectile)return;projectileLife-=dt;if(projectileLife<=0){clearProjectile();return}
  const prev=projectile.position.clone(),to=projectileTarget.subtract(projectile.position);to.y*=.35;const dist=to.length();
@@ -379,7 +411,7 @@ function update(){
   if(!Number.isFinite(player.position.x)||!Number.isFinite(player.position.y)||!Number.isFinite(player.position.z)){player.position.copyFrom(lastGoodPlayerPos);verticalVelocity=0;onGround=true;input.x=input.y=0}
   player.position.x=BABYLON.Scalar.Clamp(player.position.x,-5.5,5.5);player.position.z=BABYLON.Scalar.Clamp(player.position.z,-27,25);
   lastGoodPlayerPos.copyFrom(player.position);
-  animateWeapon();updateProjectile(dt);updateCollectible(dt);
+  animateWeapon();updateProjectile(dt);updateCollectible(dt);updateSussie(dt);
   const safeTarget=player.position.add(new BABYLON.Vector3(0,1,0));
   camera.target.copyFrom(BABYLON.Vector3.Lerp(camera.target,safeTarget,.12));
   updateCompanions(dt);updateDerpy(dt);
@@ -392,7 +424,7 @@ function update(){
  }
 }
 createScene();renderStoryLine();scene.onBeforeRenderObservable.add(update);engine.runRenderLoop(()=>scene.render());window.addEventListener('resize',()=>engine.resize());
-document.getElementById('storyNext').addEventListener('pointerdown',advanceStory);document.getElementById('chapterContinue').addEventListener('pointerdown',()=>{document.getElementById('chapterPanel').classList.add('hidden');storyPaused=false;document.getElementById('objective').textContent='CHAPITRE TERMINÉ — Explore librement.';flash('Rumi : « Beau travail. On continue la patrouille. »',1500)});
+document.getElementById('storyNext').addEventListener('pointerdown',advanceStory);document.getElementById('chapterContinue').addEventListener('pointerdown',()=>{document.getElementById('chapterPanel').classList.add('hidden');storyPaused=false;document.getElementById('objective').textContent='CHAPITRE TERMINÉ — Continue la patrouille.';flash('Rumi : « Ce n’était pas un hasard. Les ombres se rapprochent. »',1700)});
 document.getElementById('attackBtn').addEventListener('pointerdown',attack);document.getElementById('jumpBtn').addEventListener('pointerdown',jump);document.getElementById('dodgeBtn').addEventListener('pointerdown',dodge);document.getElementById('sealBtn').addEventListener('pointerdown',openSeal);
 // Robust party switching for Android/Samsung browsers.  Use several event paths
 // because some tablet browsers hand pointerdown to the 3D canvas/camera first.
