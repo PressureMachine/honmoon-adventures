@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
 <meta name="theme-color" content="#15102b" />
 <meta name="mobile-web-app-capable" content="yes" />
-<title>Honmoon Adventures — v0.7 • Chapitre 1</title>
+<title>Honmoon Adventures — v0.7.1 • Chapitre 1</title>
 <style>
 :root{--bg:#15102b;--glass:rgba(20,12,44,.79);--line:rgba(255,255,255,.2);--text:#fff;--pink:#ff4ed7;--cyan:#65e9ff;--gold:#ffd76b;--violet:#9d5cff}
 *{box-sizing:border-box} html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;touch-action:none}#gameCanvas{width:100%;height:100%;display:block;outline:none}
@@ -14,7 +14,7 @@
 .party{display:flex;gap:7px;pointer-events:auto;position:relative;z-index:60;touch-action:manipulation}.party-card,.objective,.icon-btn,.enemy-hud{background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .party-card{display:flex;align-items:center;gap:7px;padding:8px 11px;min-width:48px;min-height:48px;border-radius:14px;opacity:.66;pointer-events:auto;position:relative;z-index:61;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;cursor:pointer}.party-card.active{opacity:1;transform:translateY(2px);border-color:rgba(255,255,255,.65)}.party-card.active[data-char="rumi"]{box-shadow:0 0 19px rgba(151,75,255,.48)}.party-card.active[data-char="mira"]{box-shadow:0 0 19px rgba(255,70,135,.44)}.party-card.active[data-char="zoey"]{box-shadow:0 0 19px rgba(60,220,255,.44)}
 .portrait{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;color:white}.r{background:linear-gradient(135deg,#7f45ff,#e152ff)}.m{background:linear-gradient(135deg,#ff4d98,#ff735f)}.z{background:linear-gradient(135deg,#46cfff,#30e3c0)}
-.char-name{font-size:11px;font-weight:900;letter-spacing:.04em}.mini-state{font-size:9px;opacity:.78}.hearts{font-size:13px;color:#ff6f98;letter-spacing:1px}
+.char-name{font-size:11px;font-weight:900;letter-spacing:.04em}.mini-state{font-size:9px;opacity:.78}.hearts{font-size:13px;color:#ff6f98;letter-spacing:1px}.player-health{position:absolute;left:14px;top:72px;display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.22);font-size:10px;font-weight:900;letter-spacing:.04em;pointer-events:none}.player-health .health-name{opacity:.82}.player-health .hearts{font-size:16px}
 .objective{pointer-events:auto;padding:9px 15px;border-radius:999px;font-size:13px;text-align:center;max-width:42vw}.icon-btn{pointer-events:auto;width:42px;height:42px;border-radius:13px;color:white;font-size:19px}
 .message{position:absolute;left:50%;top:14%;transform:translateX(-50%);background:rgba(0,0,0,.62);border:1px solid var(--line);padding:9px 16px;border-radius:999px;font-weight:850;letter-spacing:.03em;text-align:center;max-width:80vw}
 .hidden{display:none!important}
@@ -37,13 +37,13 @@
 .message{box-shadow:0 0 24px rgba(113,74,255,.16)}
 
 
-/* v0.7 story/chapter layer */
+/* v0.7.1 story/chapter layer */
 .chapter-kicker{font-size:12px;letter-spacing:.18em;font-weight:950;color:var(--gold);text-transform:uppercase}
 .story-panel{max-width:680px;text-align:left}.story-panel h1{margin:7px 0 6px;font-size:clamp(28px,5vw,46px);line-height:1.05}.story-panel p{margin:8px 0 0;line-height:1.45}.story-speaker{margin-top:18px;font-size:12px;font-weight:950;color:var(--cyan);letter-spacing:.08em}.story-line{font-size:clamp(17px,2.5vw,22px);min-height:58px}.story-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}.story-btn{border:1px solid rgba(255,255,255,.28);background:linear-gradient(135deg,#7048ff,#d747d4);color:#fff;border-radius:999px;padding:12px 22px;font-weight:950;font-size:15px;min-width:150px}
 .chapter-rewards{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:18px 0}.reward-card{min-width:120px;padding:12px 16px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.17);font-weight:900}.chapter-note{font-size:13px;opacity:.8}
 .collectible-hud{position:absolute;left:50%;top:64px;transform:translateX(-50%);padding:7px 12px;border-radius:999px;background:rgba(24,14,52,.9);border:1px solid rgba(255,215,107,.4);font-size:11px;font-weight:900;color:var(--gold)}
 
-@media(max-width:900px){.party-card{padding:5px 6px}.party-card .char-meta{display:none}.portrait{width:34px;height:34px}.objective{max-width:38vw;font-size:11px}.joystick{width:112px;height:112px}.stick{width:52px;height:52px;left:28px;top:28px}.actions{transform:scale(.9);transform-origin:bottom right}.enemy-hud{top:64px}.combat-pill{right:12px;bottom:118px;font-size:9px}}
+@media(max-width:900px){.party-card{padding:5px 6px}.party-card .char-meta{display:none}.portrait{width:34px;height:34px}.objective{max-width:38vw;font-size:11px}.joystick{width:112px;height:112px}.stick{width:52px;height:52px;left:28px;top:28px}.actions{transform:scale(.9);transform-origin:bottom right}.enemy-hud{top:64px}.combat-pill{right:12px;bottom:118px;font-size:9px}.player-health{top:63px;left:12px;padding:5px 9px}.player-health .health-name{display:none}.player-health .hearts{font-size:15px}}
 </style>
 </head>
 <body>
@@ -59,6 +59,7 @@
     <button id="parentBtn" class="icon-btn">⚙</button>
   </div>
   <div id="message" class="message hidden"></div>
+  <div id="playerHealth" class="player-health"><span id="healthName" class="health-name">RUMI</span><span id="playerHearts" class="hearts">♥ ♥ ♥</span></div>
   <div id="guidePill" class="guide-pill hidden">🐯 Derpy t’attend plus loin…</div>
   <div id="combatPill" class="combat-pill"><b>RUMI</b>Saingeom • équilibrée</div>
   <div id="enemyHud" class="enemy-hud hidden"><div id="enemyTitle" class="enemy-title">BRUTE DES OMBRES</div><div class="bar"><div id="enemyFill" class="bar-fill"></div></div><div id="shieldRow" class="shield-row"><span>BOUCLIER</span><div class="shield-bar"><div id="shieldFill" class="shield-fill"></div></div></div></div>
@@ -74,11 +75,11 @@
   <div id="collectibleHud" class="collectible-hud hidden">✨ ÉCLAT D’HONMOON TROUVÉ</div>
   <div id="storyPanel" class="overlay"><div class="panel story-panel"><div class="chapter-kicker">CHAPITRE 1</div><h1>La chasse commence</h1><div id="storySpeaker" class="story-speaker">CELINE</div><div id="storyLine" class="story-line">HUNTR/X, une perturbation a été repérée dans les rues. Restez ensemble et observez bien.</div><div class="story-actions"><button id="storyNext" class="story-btn">CONTINUER</button></div></div></div>
   <div id="chapterPanel" class="overlay hidden"><div class="panel"><div class="chapter-kicker">CHAPITRE TERMINÉ</div><h1>La chasse commence</h1><p>La présence démoniaque a été scellée. Séoul est en sécurité… pour l’instant.</p><div class="chapter-rewards"><div class="reward-card">⭐ +100<br><small>ÉTOILES</small></div><div class="reward-card">💎 +2<br><small>CRISTAUX</small></div><div class="reward-card">✨ 1<br><small>ÉCLAT</small></div></div><div class="chapter-note">Tu peux maintenant explorer librement.</div><button id="chapterContinue" class="story-btn" style="margin-top:18px">CONTINUER</button></div></div>
-  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Version v0.7 — Chapitre 1, objectifs narratifs, dialogue, collecte, combat et conclusion de chapitre.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
+  <div id="parentPanel" class="overlay hidden"><div class="panel parent-panel"><h2>ESPACE PARENTS</h2><p>Version v0.7.1 — Chapitre 1, avec affichage des cœurs et protection de Celine corrigés.</p><label><input id="learningToggle" type="checkbox" checked> Activer le sceau éducatif</label><br><label><input id="derpyToggle" type="checkbox" checked> Activer le guidage Derpy</label><br><button id="closeParent">Fermer</button></div></div>
 </div>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script>
-/* Honmoon Adventures v0.7 — Chapter 1 story layer on stable v0.6.1 */
+/* Honmoon Adventures v0.7.1 — Chapter 1 bugfix layer on stable v0.6.1 */
 (()=>{
 const canvas=document.getElementById('gameCanvas');
 const engine=new BABYLON.Engine(canvas,true,{preserveDrawingBuffer:false,stencil:false,adaptToDeviceRatio:true});
@@ -247,7 +248,7 @@ function completeChapter(){if(chapterComplete)return;chapterComplete=true;storyP
 function flash(text,ms=1100){const el=document.getElementById('message');el.textContent=text;el.classList.remove('hidden');clearTimeout(flash.t);flash.t=setTimeout(()=>el.classList.add('hidden'),ms)}
 function updateCharacterUI(){
  document.querySelectorAll('.party-card').forEach(c=>{const on=c.dataset.char===activeKey;c.classList.toggle('active',on);c.setAttribute('aria-pressed',on?'true':'false')});
- const info=hunterInfo[activeKey];document.getElementById('combatPill').innerHTML=`<b>${info.name}</b>${info.desc}`;
+ const info=hunterInfo[activeKey];document.getElementById('combatPill').innerHTML=`<b>${info.name}</b>${info.desc}`;updateHearts();
  const btn=document.getElementById('attackBtn');
  if(activeKey==='rumi'){btn.innerHTML='⚔<span>Saingeom</span>';btn.style.background='linear-gradient(145deg,#833cff,#e151ef)'}
  if(activeKey==='mira'){btn.innerHTML='◒<span>Gok-do</span>';btn.style.background='linear-gradient(145deg,#d52d70,#ff665c)'}
@@ -269,7 +270,8 @@ function switchHunter(key){
 function updateEnemyHud(){const hud=document.getElementById('enemyHud'),fill=document.getElementById('enemyFill'),shield=document.getElementById('shieldFill'),row=document.getElementById('shieldRow'),title=document.getElementById('enemyTitle');if(!encounterStarted||!demon.isEnabled()){hud.classList.add('hidden');return}hud.classList.remove('hidden');fill.style.width=`${Math.max(0,demonHP)/DEMON_MAX_HP*100}%`;shield.style.width=`${Math.max(0,demonShield)/DEMON_MAX_SHIELD*100}%`;row.classList.toggle('hidden',demonShield<=0);title.textContent=demonShield>0?'BRUTE DES OMBRES • PROTÉGÉE':'BRUTE DES OMBRES • VULNÉRABLE'}
 function openSeal(){if(sealOpened)return;sealOpened=true;document.getElementById('sealBtn').classList.add('hidden');const panel=document.getElementById('sealPanel'),answers=document.getElementById('answers'),q=document.getElementById('question'),sub=document.querySelector('.seal-subtitle'),hint=document.getElementById('sealHint');answers.innerHTML='';hint.textContent='';const cs=[{type:'math',sub:'Complète le sceau',q:'8 + 7 = ?',opts:['13','14','15','16'],a:'15'},{type:'fr',sub:'Complète le sort',q:'Quel mot contient le son « ou » ?',opts:['CHAT','LOUP','PAIN','LIT'],a:'LOUP'}];const c=cs[Math.floor(Math.random()*cs.length)];sub.textContent=c.sub;q.textContent=c.q;q.style.fontSize=c.type==='fr'?'clamp(26px,5vw,44px)':'';c.opts.forEach(v=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>{if(v===c.a){hint.textContent='✨ SCEAU PARFAIT !';setTimeout(()=>{panel.classList.add('hidden');demon.setEnabled(false);updateEnemyHud();flash('DÉMON SCELLÉ !',1200);document.getElementById('objective').textContent='MISSION ACCOMPLIE !';localStorage.setItem('honmoon-stars',String((+localStorage.getItem('honmoon-stars')||0)+100));completeChapter()},750)}else{b.disabled=true;b.style.opacity=.28;hint.textContent='Presque ! Essaie encore.'}};answers.appendChild(b)});panel.classList.remove('hidden')}
 function showSealButton(){demonStunned=true;document.getElementById('sealBtn').classList.remove('hidden');document.getElementById('objective').textContent='Le démon est affaibli — SCELLE-LE !';flash('HUNTR/X : « Maintenant ! Scelle-le ! »',1500)}
-function damagePlayer(){if(playerInvulnerable>0||dodgeTime>0||playerHP<=0)return;playerHP--;playerInvulnerable=1.15;flash(playerHP>0?'AÏE ! Esquive l’attaque !':'Celine te protège !',900);player.scaling.copyFromFloats(1.16,.86,1.16);setTimeout(()=>player.scaling.copyFromFloats(1,1,1),150);if(playerHP<=0){playerHP=3;setTimeout(()=>{player.position.set(0,BASE_Y,8);flash('Celine : « Reste concentrée ! »',1400)},550)}}
+function updateHearts(){const el=document.getElementById('playerHearts'),name=document.getElementById('healthName');if(el)el.textContent=Array.from({length:3},(_,i)=>i<playerHP?'♥':'♡').join(' ');if(name)name.textContent=hunterInfo[activeKey].name}
+function damagePlayer(){if(playerInvulnerable>0||dodgeTime>0||playerHP<=0)return;playerHP--;playerInvulnerable=1.15;updateHearts();flash(playerHP>0?'AÏE ! Esquive l’attaque !':'Celine te protège !',900);player.scaling.copyFromFloats(1.16,.86,1.16);setTimeout(()=>player.scaling.copyFromFloats(1,1,1),150);if(playerHP<=0){playerInvulnerable=2.4;demonAttackCooldown=2.4;setTimeout(()=>{playerHP=3;updateHearts();if(demon&&demon.isEnabled()){const away=player.position.subtract(demon.position);away.y=0;if(away.lengthSquared()<.01)away.set(0,0,-1);else away.normalize();player.position.addInPlace(away.scale(2.5));player.position.x=BABYLON.Scalar.Clamp(player.position.x,-5.5,5.5);player.position.z=BABYLON.Scalar.Clamp(player.position.z,-27,25)}flash('Celine : « Je te protège ! Reprends ton souffle. »',1500)},420)}}
 function showImpactFx(){
  impactRing.position.copyFrom(demon.position);impactRing.position.y=.08;impactRing.scaling.copyFromFloats(.6,.6,.6);impactRing.setEnabled(true);let t=0;const obs=scene.onBeforeRenderObservable.add(()=>{t+=Math.min(engine.getDeltaTime()/1000,.033);const sc=.6+t*5;impactRing.scaling.copyFromFloats(sc,sc,sc);if(t>.18){impactRing.setEnabled(false);scene.onBeforeRenderObservable.remove(obs)}});
 }
